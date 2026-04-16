@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { FaqAccordion } from '../components/FaqAccordion'
 import { NetflixLogo } from '../components/NetflixLogo'
+import { SmartImage } from '../components/SmartImage'
 import { TrendingRow } from '../components/TrendingRow'
 import { movies } from '../data/catalog'
 import { image } from '../data/catalog'
@@ -99,7 +100,7 @@ export function LandingPage({ authed, onGetStarted }: Props) {
       <main>
         <section className="hero">
           <div className="heroBg">
-            <img src={hero} alt="" />
+            <SmartImage src={hero} alt="" />
             <div className="heroShade" />
           </div>
           <div className="heroInner">
@@ -153,7 +154,7 @@ export function LandingPage({ authed, onGetStarted }: Props) {
                   <p>{t('feature_tv_body')}</p>
                 </div>
                 <div className="reasonMedia">
-                  <img src={tv} alt="" loading="lazy" />
+                  <SmartImage src={tv} alt="" loading="lazy" />
                 </div>
               </div>
               <div className="reasonCard">
@@ -162,7 +163,7 @@ export function LandingPage({ authed, onGetStarted }: Props) {
                   <p>{t('feature_dl_body')}</p>
                 </div>
                 <div className="reasonMedia">
-                  <img src={mobile} alt="" loading="lazy" />
+                  <SmartImage src={mobile} alt="" loading="lazy" />
                 </div>
               </div>
               <div className="reasonCard">
@@ -171,7 +172,7 @@ export function LandingPage({ authed, onGetStarted }: Props) {
                   <p>{t('feature_everywhere_body')}</p>
                 </div>
                 <div className="reasonMedia">
-                  <img src={devices} alt="" loading="lazy" />
+                  <SmartImage src={devices} alt="" loading="lazy" />
                 </div>
               </div>
               <div className="reasonCard">
@@ -180,7 +181,7 @@ export function LandingPage({ authed, onGetStarted }: Props) {
                   <p>{t('feature_kids_body')}</p>
                 </div>
                 <div className="reasonMedia">
-                  <img src={kids} alt="" loading="lazy" />
+                  <SmartImage src={kids} alt="" loading="lazy" />
                 </div>
               </div>
             </div>

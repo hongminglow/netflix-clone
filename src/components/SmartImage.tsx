@@ -9,6 +9,9 @@ type Props = {
   sizes?: string
 }
 
+const transparentPixel =
+  'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='
+
 export function SmartImage({
   src,
   fallbackSrc,
@@ -19,25 +22,40 @@ export function SmartImage({
 }: Props) {
   const initial = useMemo(() => src, [src])
   const [current, setCurrent] = useState(initial)
-  const [failedOnce, setFailedOnce] = useState(false)
+  const [mode, setMode] = useState<'primary' | 'fallback' | 'blank'>('primary')
+  const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
     setCurrent(initial)
-    setFailedOnce(false)
+    setMode('primary')
+    setLoaded(false)
   }, [initial])
 
   return (
     <img
-      className={className}
+      className={`${className ?? ''} smartImage ${loaded ? 'isLoaded' : ''}`}
       src={current}
       alt={alt}
       loading={loading}
       sizes={sizes}
       referrerPolicy="no-referrer"
+      onLoad={() => {
+        if (mode === 'blank') return
+        setLoaded(true)
+      }}
       onError={() => {
-        if (failedOnce) return
-        setFailedOnce(true)
-        if (fallbackSrc) setCurrent(fallbackSrc)
+        if (mode === 'primary' && fallbackSrc) {
+          setMode('fallback')
+          setLoaded(false)
+          setCurrent(fallbackSrc)
+          return
+        }
+
+        if (mode !== 'blank') {
+          setMode('blank')
+          setLoaded(false)
+          setCurrent(transparentPixel)
+        }
       }}
     />
   )

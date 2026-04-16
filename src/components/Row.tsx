@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import useEmblaCarousel from 'embla-carousel-react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Movie } from '../data/catalog'
 import { image } from '../data/catalog'
 import { SmartImage } from './SmartImage'
@@ -11,13 +10,7 @@ type Props = {
 }
 
 export function Row({ title, items, onSelect }: Props) {
-  const [emblaRef, emblaApi] = useEmblaCarousel({
-    align: 'start',
-    slidesToScroll: 'auto',
-    containScroll: 'trimSnaps',
-    dragFree: true,
-  })
-
+  const scrollerRef = useRef<HTMLDivElement | null>(null)
   const [showLeft, setShowLeft] = useState(false)
   const [showRight, setShowRight] = useState(true)
 
@@ -26,27 +19,42 @@ export function Row({ title, items, onSelect }: Props) {
     [title],
   )
 
-  const onSelectEmbla = useCallback(() => {
-    if (!emblaApi) return
-    setShowLeft(emblaApi.canScrollPrev())
-    setShowRight(emblaApi.canScrollNext())
-  }, [emblaApi])
+  const updateNav = useCallback(() => {
+    const el = scrollerRef.current
+    if (!el) return
+    const { scrollLeft, scrollWidth, clientWidth } = el
+    const max = Math.max(0, scrollWidth - clientWidth)
+    setShowLeft(scrollLeft > 4)
+    setShowRight(scrollLeft < max - 4)
+  }, [])
 
   useEffect(() => {
-    if (!emblaApi) return
-    onSelectEmbla()
-    emblaApi.on('reInit', onSelectEmbla)
-    emblaApi.on('select', onSelectEmbla)
-    emblaApi.on('scroll', onSelectEmbla)
-  }, [emblaApi, onSelectEmbla])
+    updateNav()
+    const el = scrollerRef.current
+    if (!el) return
 
-  const scrollPrev = useCallback(() => {
-    if (emblaApi) emblaApi.scrollPrev()
-  }, [emblaApi])
+    const ro = new ResizeObserver(() => updateNav())
+    ro.observe(el)
+    const track = el.firstElementChild
+    if (track instanceof HTMLElement) ro.observe(track)
 
-  const scrollNext = useCallback(() => {
-    if (emblaApi) emblaApi.scrollNext()
-  }, [emblaApi])
+    const t = window.setTimeout(updateNav, 120)
+    return () => {
+      window.clearTimeout(t)
+      ro.disconnect()
+    }
+  }, [items, updateNav])
+
+  const scrollBy = useCallback(
+    (dir: -1 | 1) => {
+      const el = scrollerRef.current
+      if (!el) return
+      const amount = Math.round(el.clientWidth * 0.86) * dir
+      el.scrollBy({ left: amount, behavior: 'smooth' })
+      window.setTimeout(updateNav, 220)
+    },
+    [updateNav],
+  )
 
   return (
     <section className="row" aria-label={title}>
@@ -57,7 +65,7 @@ export function Row({ title, items, onSelect }: Props) {
         {showLeft && (
           <button
             className="rowNav rowNavLeft"
-            onClick={scrollPrev}
+            onClick={() => scrollBy(-1)}
             aria-label="Scroll left"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -68,7 +76,7 @@ export function Row({ title, items, onSelect }: Props) {
             </svg>
           </button>
         )}
-        <div className="rowScroller" ref={emblaRef}>
+        <div className="rowScroller" ref={scrollerRef} onScroll={updateNav}>
           <div className="rowItems">
             {items.map((m, idx) => (
               <button
@@ -84,6 +92,7 @@ export function Row({ title, items, onSelect }: Props) {
                     'portrait_4_3',
                   )}
                   alt=""
+                  loading="lazy"
                 />
               </button>
             ))}
@@ -92,7 +101,7 @@ export function Row({ title, items, onSelect }: Props) {
         {showRight && (
           <button
             className="rowNav rowNavRight"
-            onClick={scrollNext}
+            onClick={() => scrollBy(1)}
             aria-label="Scroll right"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true">

@@ -9,9 +9,6 @@ type Props = {
   sizes?: string
 }
 
-const transparentPixel =
-  'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='
-
 export function SmartImage({
   src,
   fallbackSrc,
@@ -21,42 +18,61 @@ export function SmartImage({
   sizes,
 }: Props) {
   const initial = useMemo(() => src, [src])
-  const [current, setCurrent] = useState(initial)
-  const [mode, setMode] = useState<'primary' | 'fallback' | 'blank'>('primary')
   const [loaded, setLoaded] = useState(false)
+  const [activeUrl, setActiveUrl] = useState<string | null>(null)
 
   useEffect(() => {
-    setCurrent(initial)
-    setMode('primary')
     setLoaded(false)
+    setActiveUrl(null)
   }, [initial])
 
-  return (
-    <img
-      className={`${className ?? ''} smartImage ${loaded ? 'isLoaded' : ''}`}
-      src={current}
-      alt={alt}
-      loading={loading}
-      sizes={sizes}
-      referrerPolicy="no-referrer"
-      onLoad={() => {
-        if (mode === 'blank') return
+  useEffect(() => {
+    let cancelled = false
+
+    const tryLoad = (url: string, next: string | undefined) => {
+      const img = new Image()
+      img.referrerPolicy = 'no-referrer'
+      img.decoding = 'async'
+      img.onload = () => {
+        if (cancelled) return
+        setActiveUrl(url)
         setLoaded(true)
-      }}
-      onError={() => {
-        if (mode === 'primary' && fallbackSrc) {
-          setMode('fallback')
-          setLoaded(false)
-          setCurrent(fallbackSrc)
+      }
+      img.onerror = () => {
+        if (cancelled) return
+        if (next) {
+          tryLoad(next, undefined)
           return
         }
+        setActiveUrl(null)
+        setLoaded(false)
+      }
+      img.src = url
+    }
 
-        if (mode !== 'blank') {
-          setMode('blank')
-          setLoaded(false)
-          setCurrent(transparentPixel)
-        }
-      }}
+    if (initial) tryLoad(initial, fallbackSrc)
+
+    return () => {
+      cancelled = true
+    }
+  }, [fallbackSrc, initial])
+
+  return (
+    <div
+      className={`${className ?? ''} smartImage ${loaded ? 'isLoaded' : ''}`}
+      role={alt ? 'img' : undefined}
+      aria-label={alt || undefined}
+      data-loading={loading}
+      data-sizes={sizes}
+      style={
+        activeUrl
+          ? {
+              backgroundImage: `url("${activeUrl}")`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }
+          : undefined
+      }
     />
   )
 }

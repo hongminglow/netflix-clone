@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Movie } from '../data/catalog'
 import { image } from '../data/catalog'
 import { SmartImage } from './SmartImage'
@@ -11,10 +11,26 @@ type Props = {
 
 export function TrendingRow({ title, items, onSelect }: Props) {
   const scrollerRef = useRef<HTMLDivElement | null>(null)
+  const [showLeft, setShowLeft] = useState(false)
+  const [showRight, setShowRight] = useState(true)
+
   const id = useMemo(
     () => `trending_${title.toLowerCase().replaceAll(/\s+/g, '_')}`,
     [title],
   )
+
+  const checkScroll = () => {
+    if (!scrollerRef.current) return
+    const { scrollLeft, scrollWidth, clientWidth } = scrollerRef.current
+    setShowLeft(scrollLeft > 0)
+    setShowRight(scrollLeft < scrollWidth - clientWidth - 10)
+  }
+
+  useEffect(() => {
+    checkScroll()
+    window.addEventListener('resize', checkScroll)
+    return () => window.removeEventListener('resize', checkScroll)
+  }, [items])
 
   const scrollBy = (dir: -1 | 1) => {
     const el = scrollerRef.current
@@ -32,29 +48,31 @@ export function TrendingRow({ title, items, onSelect }: Props) {
       </div>
 
       <div className="trendingRail" aria-labelledby={id}>
-        <button
-          className="rowNav rowNavLeft"
-          type="button"
-          onClick={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            scrollBy(-1)
-          }}
-          aria-label="Scroll left"
-        >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              d="M15.3 5.3 8.6 12l6.7 6.7-1.4 1.4L5.8 12l8.1-8.1 1.4 1.4Z"
-              fill="currentColor"
-            />
-          </svg>
-        </button>
+        {showLeft && (
+          <button
+            className="rowNav rowNavLeft"
+            type="button"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              scrollBy(-1)
+            }}
+            aria-label="Scroll left"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M15.3 5.3 8.6 12l6.7 6.7-1.4 1.4L5.8 12l8.1-8.1 1.4 1.4Z"
+                fill="currentColor"
+              />
+            </svg>
+          </button>
+        )}
 
-        <div className="rowScroller trendingScroller" ref={scrollerRef}>
+        <div className="rowScroller trendingScroller" ref={scrollerRef} onScroll={checkScroll}>
           <div className="trendingItems">
             {items.map((m, idx) => (
               <button
-                key={m.id}
+                key={`${m.id}-${idx}`}
                 className="trendingCard"
                 onClick={() => onSelect?.(m)}
                 aria-label={m.title}
@@ -78,23 +96,25 @@ export function TrendingRow({ title, items, onSelect }: Props) {
           </div>
         </div>
 
-        <button
-          className="rowNav rowNavRight"
-          type="button"
-          onClick={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            scrollBy(1)
-          }}
-          aria-label="Scroll right"
-        >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              d="M8.7 18.7 15.4 12 8.7 5.3l1.4-1.4L18.2 12l-8.1 8.1-1.4-1.4Z"
-              fill="currentColor"
-            />
-          </svg>
-        </button>
+        {showRight && (
+          <button
+            className="rowNav rowNavRight"
+            type="button"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              scrollBy(1)
+            }}
+            aria-label="Scroll right"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M8.7 18.7 15.4 12 8.7 5.3l1.4-1.4L18.2 12l-8.1 8.1-1.4-1.4Z"
+                fill="currentColor"
+              />
+            </svg>
+          </button>
+        )}
       </div>
     </section>
   )

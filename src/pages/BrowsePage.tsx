@@ -3,10 +3,11 @@ import { Modal } from '../components/Modal'
 import { NetflixLogo } from '../components/NetflixLogo'
 import { ProfileDropdown } from '../components/ProfileDropdown'
 import { Row } from '../components/Row'
-import { getMovie, movies, rows, type Movie } from '../data/catalog'
+import { getMovie, image, movies, rows, type Movie } from '../data/catalog'
 import { useMyList } from '../hooks/useMyList'
 import { useI18n } from '../i18n'
 import { buildWatchUrl, navigate, routes } from '../lib/router'
+import { SmartImage } from '../components/SmartImage'
 
 type Props = {
   profile: { id: string; name: string }
@@ -135,7 +136,14 @@ export function BrowsePage({ profile, onSignOut, view = 'home' }: Props) {
         {view === 'home' && (
           <section className="billboard">
           <div className="billboardBg">
-            <img src={hero.backdropUrl} alt="" />
+            <SmartImage
+              src={hero.backdropUrl}
+              fallbackSrc={image(
+                `cinematic wide still for "${hero.title}", premium streaming backdrop, dramatic lighting, deep blacks, high contrast, no text`,
+                'landscape_16_9',
+              )}
+              alt=""
+            />
             <div className="billboardShade" />
           </div>
           <div className="billboardInner">
@@ -236,7 +244,15 @@ export function BrowsePage({ profile, onSignOut, view = 'home' }: Props) {
         {selected && (
           <div className="details">
             <div className="detailsHero">
-              <img className="detailsHeroImg" src={selected.backdropUrl} alt="" />
+              <SmartImage
+                className="detailsHeroImg"
+                src={selected.backdropUrl}
+                fallbackSrc={image(
+                  `cinematic wide still for "${selected.title}", premium streaming backdrop, dramatic lighting, deep blacks, high contrast, no text`,
+                  'landscape_16_9',
+                )}
+                alt=""
+              />
               <div className="detailsHeroShade" />
               <div className="detailsHeroInner">
                 <div className="detailsTitle">{selected.title}</div>

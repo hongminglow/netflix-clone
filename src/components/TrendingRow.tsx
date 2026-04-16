@@ -1,5 +1,7 @@
 import { useMemo, useRef } from 'react'
 import type { Movie } from '../data/catalog'
+import { image } from '../data/catalog'
+import { SmartImage } from './SmartImage'
 
 type Props = {
   title: string
@@ -61,7 +63,15 @@ export function TrendingRow({ title, items, onSelect }: Props) {
                   {idx + 1}
                 </div>
                 <div className="trendingThumb">
-                  <img src={m.posterUrl} alt="" loading="lazy" />
+                  <SmartImage
+                    src={m.posterUrl}
+                    fallbackSrc={image(
+                      `high quality cinematic poster for "${m.title}", premium streaming thumbnail, dramatic lighting, centered subject, sharp focus, no text`,
+                      'portrait_4_3',
+                    )}
+                    alt=""
+                    loading="lazy"
+                  />
                 </div>
               </button>
             ))}

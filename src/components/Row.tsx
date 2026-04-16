@@ -1,5 +1,7 @@
 import { useMemo, useRef } from 'react'
 import type { Movie } from '../data/catalog'
+import { image } from '../data/catalog'
+import { SmartImage } from './SmartImage'
 
 type Props = {
   title: string
@@ -48,7 +50,15 @@ export function Row({ title, items, onSelect }: Props) {
                 onClick={() => onSelect(m)}
                 aria-label={m.title}
               >
-                <img src={m.backdropUrl} alt="" loading="lazy" />
+                <SmartImage
+                  src={m.backdropUrl}
+                  fallbackSrc={image(
+                    `cinematic wide still for "${m.title}", premium streaming backdrop, dramatic lighting, deep blacks, high contrast, no text`,
+                    'landscape_16_9',
+                  )}
+                  alt=""
+                  loading="lazy"
+                />
               </button>
             ))}
           </div>
@@ -69,4 +79,3 @@ export function Row({ title, items, onSelect }: Props) {
     </section>
   )
 }
-

@@ -46,7 +46,7 @@ export const movies: Movie[] = [
     duration: '4 Seasons',
     genres: ['Sci-Fi', 'Horror', 'Drama'],
     posterUrl: 'https://m.media-amazon.com/images/M/MV5BMDZkYmVhNjMtNWU4MC00MDQxLWE3MjYtZGMzZWI1ZjhlOWJmXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_FMjpg_UX1000_.jpg',
-    backdropUrl: 'https://m.media-amazon.com/images/M/MV5BNDllZTAzNTEtZmZmMi00MThkLThjMTMtMDJiMWQ2ZjU0ZDg4XkEyXkFqcGdeQXVyNTMxMjgxMzA@._V1_FMjpg_UX1000_.jpg',
+    backdropUrl: 'https://m.media-amazon.com/images/M/MV5BMjEzMDAxOTUyMV5BMl5BanBnXkFtZTgwNzAxMzYzOTE@._V1_FMjpg_UX1000_.jpg',
     videoUrl: v(0),
   },
   {

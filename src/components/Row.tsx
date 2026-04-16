@@ -51,13 +51,12 @@ export function Row({ title, items, onSelect }: Props) {
                 aria-label={m.title}
               >
                 <SmartImage
-                  src={m.backdropUrl}
+                  src={m.posterUrl}
                   fallbackSrc={image(
-                    `cinematic wide still for "${m.title}", premium streaming backdrop, dramatic lighting, deep blacks, high contrast, no text`,
-                    'landscape_16_9',
+                    `high quality cinematic poster for "${m.title}", premium streaming thumbnail, dramatic lighting, centered subject, sharp focus, no text`,
+                    'portrait_4_3',
                   )}
                   alt=""
-                  loading="lazy"
                 />
               </button>
             ))}

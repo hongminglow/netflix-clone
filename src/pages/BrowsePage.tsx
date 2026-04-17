@@ -193,6 +193,11 @@ export function BrowsePage({ profile, onSignOut, view = 'home' }: Props) {
               onSelect={(m) => setSelected(m)}
             />
           ))}
+          {view === 'myList' && visibleRows.length === 0 && (
+            <div className="emptyListMessage">
+              <p>You haven't added any titles to your list yet.</p>
+            </div>
+          )}
         </section>
 
         <footer className="browseFooter">

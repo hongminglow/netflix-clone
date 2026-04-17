@@ -113,8 +113,8 @@
 }
 
 .nfButtonCircle {
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   border-radius: 999px;
   border-color: rgba(255, 255, 255, 0.18);
   background: rgba(42, 42, 42, 0.35);
@@ -122,8 +122,8 @@
   align-items: center;
   justify-content: center;
   svg {
-    width: 22px;
-    height: 22px;
+    width: 28px;
+    height: 28px;
   }
   &:hover {
     background: rgba(42, 42, 42, 0.5);

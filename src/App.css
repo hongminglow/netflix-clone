@@ -1684,21 +1684,13 @@
 }
 
 .rowNavLeft {
-  left: -56px;
+  left: 0;
   background: linear-gradient(to right, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0));
-  @media (max-width: 720px) {
-    left: -18px;
-    width: 18px;
-  }
 }
 
 .rowNavRight {
-  right: -56px;
+  right: 0;
   background: linear-gradient(to left, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0));
-  @media (max-width: 720px) {
-    right: -18px;
-    width: 18px;
-  }
 }
 
 .browseFooter {

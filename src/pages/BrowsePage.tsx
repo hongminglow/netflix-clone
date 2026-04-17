@@ -71,7 +71,7 @@ export function BrowsePage({ profile, onSignOut, view = 'home' }: Props) {
       ].filter((r) => r.items.length > 0)
     }
 
-    const base = [...filteredRows]
+    const base: { id: string, title: string, items: readonly string[] }[] = [...filteredRows]
     if (myList.ids.length === 0) return base
 
     const insertIdx = base.findIndex((r) => r.id === 'r2')
@@ -253,10 +253,10 @@ export function BrowsePage({ profile, onSignOut, view = 'home' }: Props) {
             <div className="detailsHero">
               <SmartImage
                 className="detailsHeroImg"
-                src={selected.posterUrl}
+                src={selected.backdropUrl}
                 fallbackSrc={image(
-                  `high quality cinematic poster for "${selected.title}", premium streaming thumbnail, dramatic lighting, centered subject, sharp focus, no text`,
-                  'portrait_4_3',
+                  `cinematic wide still for "${selected.title}", premium streaming backdrop, dramatic lighting, deep blacks, high contrast, no text`,
+                  'landscape_16_9',
                 )}
                 alt=""
               />

@@ -254,10 +254,13 @@ export function BrowsePage({ profile, onSignOut, view = 'home' }: Props) {
               <SmartImage
                 className="detailsHeroImg"
                 src={selected.backdropUrl}
-                fallbackSrc={image(
-                  `cinematic wide still for "${selected.title}", premium streaming backdrop, dramatic lighting, deep blacks, high contrast, no text`,
-                  'landscape_16_9',
-                )}
+                fallbackSrc={[
+                  selected.posterUrl.includes('/w500/') ? selected.posterUrl.replace('/w500/', '/w780/') : selected.posterUrl,
+                  image(
+                    `cinematic wide still for "${selected.title}", premium streaming backdrop, dramatic lighting, deep blacks, high contrast, no text`,
+                    'landscape_16_9',
+                  ),
+                ]}
                 alt=""
               />
               <div className="detailsHeroShade" />

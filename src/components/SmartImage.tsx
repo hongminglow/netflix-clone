@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 
 type Props = {
   src: string
-  fallbackSrc?: string
+  fallbackSrc?: string | string[]
   alt: string
   className?: string
   loading?: 'eager' | 'lazy'
@@ -29,7 +29,7 @@ export function SmartImage({
   useEffect(() => {
     let cancelled = false
 
-    const tryLoad = (url: string, next: string | undefined) => {
+    const tryLoad = (url: string, next: string[]) => {
       const img = new Image()
       img.referrerPolicy = 'no-referrer'
       img.decoding = 'async'
@@ -40,8 +40,9 @@ export function SmartImage({
       }
       img.onerror = () => {
         if (cancelled) return
-        if (next) {
-          tryLoad(next, undefined)
+        const nextUrl = next[0]
+        if (nextUrl) {
+          tryLoad(nextUrl, next.slice(1))
           return
         }
         setActiveUrl(null)
@@ -50,7 +51,8 @@ export function SmartImage({
       img.src = url
     }
 
-    if (initial) tryLoad(initial, fallbackSrc)
+    const fallbacks = Array.isArray(fallbackSrc) ? fallbackSrc : fallbackSrc ? [fallbackSrc] : []
+    if (initial) tryLoad(initial, fallbacks)
 
     return () => {
       cancelled = true

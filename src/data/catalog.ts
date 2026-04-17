@@ -165,8 +165,8 @@ export const movies: Movie[] = [
     maturity: 'TV-MA',
     duration: '4 Seasons',
     genres: ['Crime', 'Drama', 'Thriller'],
-    posterUrl: 'https://image.tmdb.org/t/p/w500/m73bD8VipiFNcVySF8DXFvoFEn.jpg',
-    backdropUrl: 'https://image.tmdb.org/t/p/w1280/1v5y8W0V6B9R4s9Q5c5Y8K4n9L6.jpg',
+    posterUrl: 'https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8TJq6IQPS.jpg',
+    backdropUrl: 'https://image.tmdb.org/t/p/w1280/56v2KjBlU4XaOv9rVYEQypROD7P.jpg',
     videoUrl: v(2),
   },
   {
@@ -177,8 +177,8 @@ export const movies: Movie[] = [
     maturity: 'TV-MA',
     duration: '6 Seasons',
     genres: ['Sci-Fi', 'Drama', 'Thriller'],
-    posterUrl: 'https://image.tmdb.org/t/p/w500/5UaYsGZOFvkUkgDtwO8wSAm3k0G.jpg',
-    backdropUrl: 'https://image.tmdb.org/t/p/w1280/5Z3n2t8J6b0E7h5O4a9V8u4M9j3.jpg',
+    posterUrl: 'https://image.tmdb.org/t/p/w500/dDlEmu3EZ0PggZ3qE0SqNVQ2EbD.jpg',
+    backdropUrl: 'https://image.tmdb.org/t/p/w1280/qw3J9cNeLioTg84CMDwWHuVInPN.jpg',
     videoUrl: v(3),
   },
 ]

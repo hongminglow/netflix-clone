@@ -13,9 +13,8 @@ type Props = {
 export function TrendingRow({ title, items, onSelect }: Props) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: 'start',
-    slidesToScroll: 3,
+    slidesToScroll: 4,
     containScroll: 'trimSnaps',
-    dragFree: true,
   })
 
   const [showLeft, setShowLeft] = useState(false)

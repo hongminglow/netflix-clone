@@ -435,7 +435,7 @@
 .trendingRail .rowNav {
   top: 0;
   bottom: 0;
-  width: 88px;
+  width: 56px;
   z-index: 30;
   pointer-events: auto;
   opacity: 0.18;
@@ -1668,6 +1668,7 @@
   color: rgba(255, 255, 255, 0.92);
   opacity: 0;
   transition: opacity 0.16s ease;
+  z-index: 10;
   svg {
     width: 26px;
     height: 26px;
@@ -1692,6 +1693,7 @@
   right: 0;
   background: linear-gradient(to left, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0));
 }
+
 
 .browseFooter {
   padding: 70px 0 80px;
@@ -1788,9 +1790,8 @@
   height: 100%;
   object-fit: contain;
   object-position: center;
-  transform: scale(1.02);
-  filter: saturate(1.08) contrast(1.08);
   pointer-events: none;
+  background: #000;
 }
 .detailsHeroShade {
   position: absolute;

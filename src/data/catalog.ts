@@ -165,14 +165,8 @@ export const movies: Movie[] = [
     maturity: 'TV-MA',
     duration: '4 Seasons',
     genres: ['Crime', 'Drama', 'Thriller'],
-    posterUrl: image(
-      'high quality cinematic poster for "Ozark", premium streaming thumbnail, moody lighting, dramatic contrast, no text',
-      'portrait_4_3',
-    ),
-    backdropUrl: image(
-      'cinematic wide still inspired by "Ozark", premium streaming backdrop, moody lighting, dramatic contrast, no text',
-      'landscape_16_9',
-    ),
+    posterUrl: 'https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8TJq6IQPS.jpg',
+    backdropUrl: 'https://image.tmdb.org/t/p/w1280/56v2KjBlU4XaOv9rVYEQypROD7P.jpg',
     videoUrl: v(2),
   },
   {
@@ -183,14 +177,8 @@ export const movies: Movie[] = [
     maturity: 'TV-MA',
     duration: '6 Seasons',
     genres: ['Sci-Fi', 'Drama', 'Thriller'],
-    posterUrl: image(
-      'high quality cinematic poster for "Black Mirror", premium streaming thumbnail, futuristic noir lighting, high contrast, no text',
-      'portrait_4_3',
-    ),
-    backdropUrl: image(
-      'cinematic wide still inspired by "Black Mirror", premium streaming backdrop, futuristic noir lighting, high contrast, no text',
-      'landscape_16_9',
-    ),
+    posterUrl: 'https://image.tmdb.org/t/p/w500/dDlEmu3EZ0PggZ3qE0SqNVQ2EbD.jpg',
+    backdropUrl: 'https://image.tmdb.org/t/p/w1280/qw3J9cNeLioTg84CMDwWHuVInPN.jpg',
     videoUrl: v(3),
   },
 ]

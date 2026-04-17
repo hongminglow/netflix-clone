@@ -19,31 +19,29 @@ export function Row({ title, items, onSelect }: Props) {
     [title],
   )
 
-  const updateNav = useCallback(() => {
-    const el = scrollerRef.current
-    if (!el) return
-    const { scrollLeft, scrollWidth, clientWidth } = el
-    const max = Math.max(0, scrollWidth - clientWidth)
+  const checkScroll = useCallback(() => {
+    if (!scrollerRef.current) return
+    const { scrollLeft, scrollWidth, clientWidth } = scrollerRef.current
     setShowLeft(scrollLeft > 4)
-    setShowRight(scrollLeft < max - 4)
+    setShowRight(scrollLeft + clientWidth < scrollWidth - 5)
   }, [])
 
   useEffect(() => {
-    updateNav()
+    checkScroll()
     const el = scrollerRef.current
     if (!el) return
 
-    const ro = new ResizeObserver(() => updateNav())
+    const ro = new ResizeObserver(() => checkScroll())
     ro.observe(el)
     const track = el.firstElementChild
     if (track instanceof HTMLElement) ro.observe(track)
 
-    const t = window.setTimeout(updateNav, 120)
+    const t = window.setTimeout(checkScroll, 120)
     return () => {
       window.clearTimeout(t)
       ro.disconnect()
     }
-  }, [items, updateNav])
+  }, [items, checkScroll])
 
   const scrollBy = useCallback(
     (dir: -1 | 1) => {
@@ -76,7 +74,7 @@ export function Row({ title, items, onSelect }: Props) {
             </svg>
           </button>
         )}
-        <div className="rowScroller" ref={scrollerRef} onScroll={updateNav}>
+        <div className="rowScroller" ref={scrollerRef} onScroll={checkScroll}>
           <div className="rowItems">
             {items.map((m, idx) => (
               <button

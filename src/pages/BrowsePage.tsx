@@ -246,7 +246,7 @@ export function BrowsePage({ profile, onSignOut, view = 'home' }: Props) {
             <div className="detailsHero">
               <SmartImage
                 className="detailsHeroImg"
-                src={selected.backdropUrl}
+                src={selected.posterUrl}
                 fallbackSrc={image(
                   `cinematic wide still for "${selected.title}", premium streaming backdrop, dramatic lighting, deep blacks, high contrast, no text`,
                   'landscape_16_9',

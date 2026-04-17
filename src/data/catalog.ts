@@ -166,7 +166,7 @@ export const movies: Movie[] = [
     duration: '4 Seasons',
     genres: ['Crime', 'Drama', 'Thriller'],
     posterUrl: 'https://image.tmdb.org/t/p/w500/m73bD8VipiFNcVySF8DXFvoFEn.jpg',
-    backdropUrl: 'https://image.tmdb.org/t/p/w1280/q8eeqbACqpePGAh2a1VqEts8X7y.jpg',
+    backdropUrl: 'https://image.tmdb.org/t/p/w1280/1v5y8W0V6B9R4s9Q5c5Y8K4n9L6.jpg',
     videoUrl: v(2),
   },
   {
@@ -178,7 +178,7 @@ export const movies: Movie[] = [
     duration: '6 Seasons',
     genres: ['Sci-Fi', 'Drama', 'Thriller'],
     posterUrl: 'https://image.tmdb.org/t/p/w500/5UaYsGZOFvkUkgDtwO8wSAm3k0G.jpg',
-    backdropUrl: 'https://image.tmdb.org/t/p/w1280/AihgKzQj7yIeK2hW2kXgYpP8a2S.jpg',
+    backdropUrl: 'https://image.tmdb.org/t/p/w1280/5Z3n2t8J6b0E7h5O4a9V8u4M9j3.jpg',
     videoUrl: v(3),
   },
 ]

@@ -1803,10 +1803,11 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: top;
   transform: scale(1.02);
   filter: saturate(1.08) contrast(1.08);
+  pointer-events: none;
 }
-
 .detailsHeroShade {
   position: absolute;
   inset: 0;

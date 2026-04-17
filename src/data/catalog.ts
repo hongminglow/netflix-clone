@@ -105,8 +105,8 @@ export const movies: Movie[] = [
     maturity: 'TV-MA',
     duration: '6 Seasons',
     genres: ['Crime', 'Drama'],
-    posterUrl: 'https://image.tmdb.org/t/p/w500/fC2HDm5t0kHlAMOINAYoZA2ajSy.jpg',
-    backdropUrl: 'https://image.tmdb.org/t/p/w1280/p10gvkGxctjaOKyyvjsal2SikD.jpg',
+    posterUrl: 'https://image.tmdb.org/t/p/w500/zjg4jpK1Wp2kiRvtt5ND0kznako.jpg',
+    backdropUrl: 'https://image.tmdb.org/t/p/w1280/t15KHp3iNfHVQBNIaqUGW12xQA4.jpg',
     videoUrl: v(1),
   },
   {

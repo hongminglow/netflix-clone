@@ -18,63 +18,38 @@ export function SmartImage({
   sizes,
 }: Props) {
   const initial = useMemo(() => src, [src])
+  const fallbacks = useMemo(
+    () => (Array.isArray(fallbackSrc) ? fallbackSrc : fallbackSrc ? [fallbackSrc] : []),
+    [fallbackSrc],
+  )
+  const candidates = useMemo(() => [initial, ...fallbacks].filter(Boolean), [fallbacks, initial])
+  const [idx, setIdx] = useState(0)
   const [loaded, setLoaded] = useState(false)
-  const [activeUrl, setActiveUrl] = useState<string | null>(null)
 
   useEffect(() => {
+    setIdx(0)
     setLoaded(false)
-    setActiveUrl(null)
   }, [initial])
 
-  useEffect(() => {
-    let cancelled = false
-
-    const tryLoad = (url: string, next: string[]) => {
-      const img = new Image()
-      img.referrerPolicy = 'no-referrer'
-      img.decoding = 'async'
-      img.onload = () => {
-        if (cancelled) return
-        setActiveUrl(url)
-        setLoaded(true)
-      }
-      img.onerror = () => {
-        if (cancelled) return
-        const nextUrl = next[0]
-        if (nextUrl) {
-          tryLoad(nextUrl, next.slice(1))
-          return
-        }
-        setActiveUrl(null)
-        setLoaded(false)
-      }
-      img.src = url
-    }
-
-    const fallbacks = Array.isArray(fallbackSrc) ? fallbackSrc : fallbackSrc ? [fallbackSrc] : []
-    if (initial) tryLoad(initial, fallbacks)
-
-    return () => {
-      cancelled = true
-    }
-  }, [fallbackSrc, initial])
+  const activeUrl = candidates[idx] ?? ''
 
   return (
-    <div
-      className={`${className ?? ''} smartImage ${loaded ? 'isLoaded' : ''}`}
-      role={alt ? 'img' : undefined}
-      aria-label={alt || undefined}
-      data-loading={loading}
-      data-sizes={sizes}
-      style={
-        activeUrl
-          ? {
-              backgroundImage: `url("${activeUrl}")`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }
-          : undefined
-      }
-    />
+    <div className={`${className ?? ''} smartImage ${loaded ? 'isLoaded' : ''}`}>
+      {activeUrl ? (
+        <img
+          src={activeUrl}
+          alt={alt}
+          loading={loading}
+          sizes={sizes}
+          referrerPolicy="no-referrer"
+          decoding="async"
+          onLoad={() => setLoaded(true)}
+          onError={() => {
+            setLoaded(false)
+            setIdx((v) => (v + 1 < candidates.length ? v + 1 : v))
+          }}
+        />
+      ) : null}
+    </div>
   )
 }

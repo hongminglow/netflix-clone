@@ -12,6 +12,7 @@
 }
 
 .smartImage {
+  position: relative;
   display: block;
   width: 100%;
   height: 100%;
@@ -26,9 +27,22 @@
   animation: nfShimmer 1.1s linear infinite;
 }
 
+.smartImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
 .smartImage.isLoaded {
   animation: none;
   background: transparent;
+}
+
+.smartImage.isLoaded img {
+  opacity: 1;
 }
 
 .nfLogo {
@@ -1858,9 +1872,14 @@
 .detailsHeroImg {
   width: 100%;
   height: 100%;
+  pointer-events: none;
+}
+
+.detailsHeroImg img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   object-position: center;
-  pointer-events: none;
 }
 .detailsHeroShade {
   position: absolute;

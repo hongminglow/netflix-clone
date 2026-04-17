@@ -71,12 +71,14 @@ export function BrowsePage({ profile, onSignOut, view = 'home' }: Props) {
       ].filter((r) => r.items.length > 0)
     }
 
-    const base = filteredRows
+    const base = [...filteredRows]
     if (myList.ids.length === 0) return base
-    return [
-      { id: 'my_list', title: t('nav_myList'), items: myList.ids },
-      ...base,
-    ]
+
+    const insertIdx = base.findIndex((r) => r.id === 'r2')
+    const finalIdx = insertIdx !== -1 ? insertIdx + 1 : Math.min(2, base.length)
+
+    base.splice(finalIdx, 0, { id: 'my_list', title: t('nav_myList'), items: myList.ids })
+    return base
   }, [filteredRows, myList.ids, t, view])
 
   return (
@@ -184,7 +186,7 @@ export function BrowsePage({ profile, onSignOut, view = 'home' }: Props) {
           </section>
         )}
 
-        <section className="rows">
+        <section className={`rows ${view === 'myList' ? 'isMyList' : ''}`}>
           {visibleRows.map((r) => (
             <Row
               key={r.id}

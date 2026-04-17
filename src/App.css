@@ -1740,6 +1740,15 @@
   z-index: 80;
   overflow-y: auto;
   padding: 32px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.nfModal::before,
+.nfModal::after {
+  content: "";
+  margin: auto;
 }
 
 .nfModalBackdrop {
@@ -1756,7 +1765,7 @@
   border-radius: 10px;
   overflow: hidden;
   box-shadow: rgba(0, 0, 0, 0.7) 0 28px 90px;
-  margin: 0 auto;
+  flex-shrink: 0;
 }
 
 .nfModalClose {

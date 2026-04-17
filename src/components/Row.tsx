@@ -13,8 +13,9 @@ type Props = {
 export function Row({ title, items, onSelect }: Props) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: 'start',
-    slidesToScroll: 4,
+    slidesToScroll: 'auto',
     containScroll: 'trimSnaps',
+    dragFree: true,
   })
 
   const [showLeft, setShowLeft] = useState(false)
@@ -27,8 +28,10 @@ export function Row({ title, items, onSelect }: Props) {
 
   const onSelectEmbla = useCallback(() => {
     if (!emblaApi) return
-    setShowLeft(emblaApi.canScrollPrev())
-    setShowRight(emblaApi.canScrollNext())
+    // Embla has a tiny floating point rounding issue sometimes where canScrollPrev() is false when scroll is at 0.001
+    // Checking scrollProgress directly provides more robust fallback
+    setShowLeft(emblaApi.canScrollPrev() || emblaApi.scrollProgress() > 0.01)
+    setShowRight(emblaApi.canScrollNext() || emblaApi.scrollProgress() < 0.99)
   }, [emblaApi])
 
   useEffect(() => {
@@ -37,6 +40,7 @@ export function Row({ title, items, onSelect }: Props) {
     emblaApi.on('reInit', onSelectEmbla)
     emblaApi.on('select', onSelectEmbla)
     emblaApi.on('scroll', onSelectEmbla)
+    emblaApi.on('settle', onSelectEmbla)
   }, [emblaApi, onSelectEmbla])
 
   const scrollPrev = useCallback(() => {

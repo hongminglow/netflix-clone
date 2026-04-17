@@ -13,8 +13,9 @@ type Props = {
 export function TrendingRow({ title, items, onSelect }: Props) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: 'start',
-    slidesToScroll: 4,
+    slidesToScroll: 'auto',
     containScroll: 'trimSnaps',
+    dragFree: true,
   })
 
   const [showLeft, setShowLeft] = useState(false)
@@ -27,8 +28,8 @@ export function TrendingRow({ title, items, onSelect }: Props) {
 
   const onSelectEmbla = useCallback(() => {
     if (!emblaApi) return
-    setShowLeft(emblaApi.canScrollPrev())
-    setShowRight(emblaApi.canScrollNext())
+    setShowLeft(emblaApi.canScrollPrev() || emblaApi.scrollProgress() > 0.01)
+    setShowRight(emblaApi.canScrollNext() || emblaApi.scrollProgress() < 0.99)
   }, [emblaApi])
 
   useEffect(() => {
@@ -37,6 +38,7 @@ export function TrendingRow({ title, items, onSelect }: Props) {
     emblaApi.on('reInit', onSelectEmbla)
     emblaApi.on('select', onSelectEmbla)
     emblaApi.on('scroll', onSelectEmbla)
+    emblaApi.on('settle', onSelectEmbla)
   }, [emblaApi, onSelectEmbla])
 
   const scrollPrev = useCallback(() => {

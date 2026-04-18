@@ -1,19 +1,21 @@
 import { useCallback } from 'react'
-import { useLocalStorageState } from './useLocalStorageState'
+import { useStore } from '../store'
 
 export function useMyList(profileId: string) {
-  const [ids, setIds] = useLocalStorageState<string[]>(`nf.myList.${profileId}`, [])
+  const { myLists, addToList, removeFromList } = useStore()
+  const ids = myLists[profileId] || []
 
   const has = useCallback((id: string) => ids.includes(id), [ids])
 
   const toggle = useCallback(
     (id: string) => {
-      setIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [id, ...prev]))
+      if (has(id)) removeFromList(profileId, id)
+      else addToList(profileId, id)
     },
-    [setIds],
+    [has, profileId, removeFromList, addToList],
   )
 
-  const remove = useCallback((id: string) => setIds((prev) => prev.filter((x) => x !== id)), [setIds])
+  const remove = useCallback((id: string) => removeFromList(profileId, id), [profileId, removeFromList])
 
   return { ids, has, toggle, remove }
 }

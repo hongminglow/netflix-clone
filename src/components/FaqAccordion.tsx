@@ -31,24 +31,21 @@ export function FaqAccordion({ items }: Props) {
               type="button"
             >
               <span className="faqQText">{it.question}</span>
-              <span className="faqQIcon" aria-hidden="true">
-                {isOpen ? (
-                  <svg viewBox="0 0 24 24">
-                    <path
-                      d="M6.3 5l12.7 12.7-1.3 1.3L5 6.3 6.3 5Zm12.7 1.3L6.3 19 5 17.7 17.7 5l1.3 1.3Z"
-                      fill="currentColor"
-                    />
-                  </svg>
-                ) : (
-                  <svg viewBox="0 0 24 24">
-                    <path
-                      d="M12 5v14m-7-7h14"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                )}
+              <span 
+                className="faqQIcon" 
+                aria-hidden="true"
+                style={{
+                  transform: isOpen ? 'rotate(45deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.25s ease'
+                }}
+              >
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M12 4v16m-8-8h16"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                  />
+                </svg>
               </span>
             </button>
             <div

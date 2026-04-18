@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, type ReactNode } from 'react'
-import { useLocalStorageState } from './hooks/useLocalStorageState'
+import { useStore } from './store'
 
 export type Lang = 'en' | 'bm' | 'zh' | 'ms'
 
@@ -14,7 +14,7 @@ const strings = {
     sign_out: 'Sign out',
     get_started: 'Get Started',
     hero_title: 'Unlimited movies, TV shows, and more',
-    hero_sub: 'Starts at RM 15.98. Cancel anytime.',
+    hero_sub: 'Starts at RM 18.90. Cancel anytime.',
     hero_hint:
       'Ready to watch? Enter your email to create or restart your membership.',
     email: 'Email address',
@@ -91,7 +91,7 @@ const strings = {
     sign_out: 'Log keluar',
     get_started: 'Mula',
     hero_title: 'Filem, rancangan TV dan banyak lagi tanpa had',
-    hero_sub: 'Bermula pada RM 15.98. Batal bila-bila masa.',
+    hero_sub: 'Bermula pada RM 18.90. Batal bila-bila masa.',
     hero_hint:
       'Sedia untuk menonton? Masukkan e-mel anda untuk membuat atau mulakan semula keahlian.',
     email: 'Alamat e-mel',
@@ -169,7 +169,7 @@ const strings = {
     sign_out: '退出登录',
     get_started: '开始使用',
     hero_title: '海量电影、剧集和更多内容',
-    hero_sub: '低至 RM 15.98。随时取消。',
+    hero_sub: '低至 RM 18.90。随时取消。',
     hero_hint: '准备观看？输入邮箱以创建或重新开始会员资格。',
     email: '邮箱地址',
     more_reasons: '加入的更多理由',
@@ -247,13 +247,13 @@ type Ctx = {
 const I18nContext = createContext<Ctx | null>(null)
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [lang, setLang] = useLocalStorageState<Lang>('nf.lang', 'en')
+  const { lang, setLang } = useStore()
   const effectiveLang: Exclude<Lang, 'ms'> = lang === 'ms' ? 'bm' : lang
 
   useEffect(() => {
     if (lang === 'ms') setLang('bm')
     document.documentElement.lang = effectiveLang === 'bm' ? 'ms' : effectiveLang
-  }, [lang, setLang])
+  }, [lang, setLang, effectiveLang])
 
   const t = useMemo(() => {
     return (key: I18nKey) =>

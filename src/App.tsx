@@ -8,16 +8,13 @@ import { SignupPage } from './pages/SignupPage'
 import { WatchPage } from './pages/WatchPage'
 import { AccountPage } from './pages/AccountPage'
 import { EditProfilePage } from './pages/EditProfilePage'
-import { useLocalStorageState } from './hooks/useLocalStorageState'
+import { useStore } from './store'
 import { useRoute } from './hooks/useRoute'
 import { getRouteFromLocation, navigate, routes } from './lib/router'
 
 function App() {
   const route = useRoute()
-  const [session, setSession] = useLocalStorageState('nf.session', {
-    user: null as null | { id: string; email: string },
-    profile: null as null | { id: string; name: string },
-  })
+  const { session, setSession } = useStore()
 
   const authed = !!session.user
   const resolvedRoute = useMemo(() => getRouteFromLocation(route), [route])
@@ -77,13 +74,13 @@ function App() {
       {guards.name === 'browse' && session.profile && (
         <BrowsePage
           profile={session.profile}
-          onSignOut={() => setSession({ user: null, profile: null })}
+          onSignOut={() => setSession(() => ({ user: null, profile: null }))}
         />
       )}
       {guards.name === 'myList' && session.profile && (
         <BrowsePage
           profile={session.profile}
-          onSignOut={() => setSession({ user: null, profile: null })}
+          onSignOut={() => setSession(() => ({ user: null, profile: null }))}
           view="myList"
         />
       )}

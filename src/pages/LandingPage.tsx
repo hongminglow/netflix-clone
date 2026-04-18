@@ -17,15 +17,6 @@ export function LandingPage({ authed, onGetStarted }: Props) {
   const { lang, setLang, t } = useI18n()
   const [email, setEmail] = useState('')
 
-  const hero = useMemo(
-    () =>
-      image(
-        'cinematic collage of diverse characters in dramatic lighting, deep blacks, subtle red accent glow, premium streaming platform hero background, realistic photography look, high contrast, wide composition, no text',
-        'landscape_16_9',
-      ),
-    [],
-  )
-
   const tv = useMemo(
     () =>
       image(
@@ -100,7 +91,34 @@ export function LandingPage({ authed, onGetStarted }: Props) {
       <main>
         <section className="hero">
           <div className="heroBg">
-            <SmartImage src={hero} alt="" />
+            <div className="heroPosterGrid">
+              {[
+                'https://image.tmdb.org/t/p/w342/uOOtwVbSr4QDjAGIifLDwpb2Pdl.jpg',
+                'https://image.tmdb.org/t/p/w342/1QdXdRYfktUSONkl1oD5gc6Be0s.jpg',
+                'https://image.tmdb.org/t/p/w342/7vjaCdMw15FEbXyLQTVa04URsPm.jpg',
+                'https://image.tmdb.org/t/p/w342/reEMJA1uzscCbkpeRJeTT2bjqUp.jpg',
+                'https://image.tmdb.org/t/p/w342/ggFHVNu6YYI5L9pCfOacjizRGt.jpg',
+                'https://image.tmdb.org/t/p/w342/zjg4jpK1Wp2kiRvtt5ND0kznako.jpg',
+                'https://image.tmdb.org/t/p/w342/vUUqzWa2LnHIVqkaKVlVGkVcZIW.jpg',
+                'https://image.tmdb.org/t/p/w342/zU0htIQ5Glsd6l75355KntvH2f6.jpg',
+                'https://image.tmdb.org/t/p/w342/apbrbWs8M9lyOpJYU5WXrpFbk1Z.jpg',
+                'https://image.tmdb.org/t/p/w342/rTmal9fOb0hEWabwgJSiFJGwqHC.jpg',
+                'https://image.tmdb.org/t/p/w342/7vjaCdMw15FEbXyLQTVa04URsPm.jpg',
+                'https://image.tmdb.org/t/p/w342/uOOtwVbSr4QDjAGIifLDwpb2Pdl.jpg',
+                'https://image.tmdb.org/t/p/w342/reEMJA1uzscCbkpeRJeTT2bjqUp.jpg',
+                'https://image.tmdb.org/t/p/w342/apbrbWs8M9lyOpJYU5WXrpFbk1Z.jpg',
+                'https://image.tmdb.org/t/p/w342/1QdXdRYfktUSONkl1oD5gc6Be0s.jpg',
+                'https://image.tmdb.org/t/p/w342/zjg4jpK1Wp2kiRvtt5ND0kznako.jpg',
+                'https://image.tmdb.org/t/p/w342/vUUqzWa2LnHIVqkaKVlVGkVcZIW.jpg',
+                'https://image.tmdb.org/t/p/w342/zU0htIQ5Glsd6l75355KntvH2f6.jpg',
+                'https://image.tmdb.org/t/p/w342/rTmal9fOb0hEWabwgJSiFJGwqHC.jpg',
+                'https://image.tmdb.org/t/p/w342/ggFHVNu6YYI5L9pCfOacjizRGt.jpg',
+              ].map((src, i) => (
+                <div key={i} className="heroPosterCell">
+                  <img src={src} alt="" loading="lazy" />
+                </div>
+              ))}
+            </div>
             <div className="heroShade" />
           </div>
           <div className="heroInner">

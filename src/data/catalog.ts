@@ -12,6 +12,18 @@ export function image(prompt: string, size: ImageSize) {
   return `${imageBase}?prompt=${encodeURIComponent(prompt)}&image_size=${size}`
 }
 
+export function slugify(title: string) {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+}
+
+export function getMovieBySlug(slug: string) {
+  return movies.find((m) => slugify(m.title) === slug) ?? null
+}
+
 export type Movie = {
   id: string
   title: string

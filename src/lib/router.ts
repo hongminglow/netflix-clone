@@ -1,3 +1,5 @@
+import { getMovieBySlug, slugify, movies } from '../data/catalog'
+
 export const routes = {
   home: '/',
   login: '/login',
@@ -40,16 +42,27 @@ export function getRouteFromLocation(path: string): AppRoute {
   if (pathname === routes.browse) return { name: 'browse' }
   if (pathname === routes.myList) return { name: 'myList' }
   if (pathname === routes.account) return { name: 'account' }
-  if (pathname === routes.watch)
-    return { name: 'watch', movieId: url.searchParams.get('v') }
+  if (pathname.startsWith(routes.watch)) {
+    const slug = pathname.slice(routes.watch.length).replace(/^\//, '')
+    const movie = slug ? getMovieBySlug(slug) : null
+    return { name: 'watch', movieId: movie?.id ?? null }
+  }
   return { name: 'home' }
 }
 
+/** Build a human-readable watch URL like /watch/stranger-things */
 export function buildWatchUrl(movieId: string) {
-  return `${routes.watch}?v=${encodeURIComponent(movieId)}`
+  const movie = movies.find((m) => m.id === movieId)
+  if (!movie) return `${routes.watch}/${movieId}`
+  return `${routes.watch}/${slugify(movie.title)}`
 }
 
+/** Resolve the current /watch/<slug> path back to a movie ID */
 export function getWatchMovieId() {
-  const params = new URLSearchParams(window.location.search)
-  return params.get('v')
+  const pathname = window.location.pathname
+  const slug = pathname.startsWith(routes.watch)
+    ? pathname.slice(routes.watch.length).replace(/^\//, '')
+    : null
+  if (!slug) return null
+  return getMovieBySlug(slug)?.id ?? null
 }

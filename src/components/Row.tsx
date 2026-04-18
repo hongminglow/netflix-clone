@@ -19,7 +19,7 @@ export function Row({ title, items, onSelect }: Props) {
   })
 
   const [showLeft, setShowLeft] = useState(false)
-  const [showRight, setShowRight] = useState(true)
+  const [showRight, setShowRight] = useState(false)
 
   const id = useMemo(
     () => `row_${title.toLowerCase().replaceAll(/\s+/g, '_')}`,
@@ -28,10 +28,8 @@ export function Row({ title, items, onSelect }: Props) {
 
   const onSelectEmbla = useCallback(() => {
     if (!emblaApi) return
-    // Embla has a tiny floating point rounding issue sometimes where canScrollPrev() is false when scroll is at 0.001
-    // Checking scrollProgress directly provides more robust fallback
-    setShowLeft(emblaApi.canScrollPrev() || emblaApi.scrollProgress() > 0.01)
-    setShowRight(emblaApi.canScrollNext() || emblaApi.scrollProgress() < 0.99)
+    setShowLeft(emblaApi.canScrollPrev())
+    setShowRight(emblaApi.canScrollNext())
   }, [emblaApi])
 
   useEffect(() => {

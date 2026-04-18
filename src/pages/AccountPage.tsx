@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { NetflixLogo } from '../components/NetflixLogo'
 import { defaultProfiles } from '../data/profiles'
 import { navigate, routes } from '../lib/router'
@@ -6,7 +7,134 @@ type Props = {
   currentProfileId: string
 }
 
+const PLANS = [
+  {
+    id: 'standard-ads',
+    name: 'Standard\nwith ads',
+    price: 'RM 18.90',
+    quality: 'Full HD',
+    resolution: '1080p',
+    downloads: false,
+    screens: 2,
+    isCurrent: false,
+  },
+  {
+    id: 'standard',
+    name: 'Standard',
+    price: 'RM 38.90',
+    quality: 'Full HD',
+    resolution: '1080p',
+    downloads: true,
+    screens: 2,
+    isCurrent: false,
+  },
+  {
+    id: 'premium',
+    name: 'Premium',
+    price: 'RM 54.90',
+    quality: 'Ultra HD',
+    resolution: '4K+HDR',
+    downloads: true,
+    screens: 4,
+    isCurrent: true,
+  },
+] as const
+
+
+function PlanModal({ onClose }: { onClose: () => void }) {
+  const [selected, setSelected] = useState<string>('premium')
+
+  return (
+    <div className="planModalOverlay" onClick={onClose} role="dialog" aria-modal="true" aria-label="Change Plan">
+      <div className="planModal" onClick={(e) => e.stopPropagation()}>
+        <div className="planModalHeader">
+          <h2 className="planModalTitle">Change Plan</h2>
+          <button className="planModalClose" onClick={onClose} aria-label="Close">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M18 6 6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </button>
+        </div>
+
+        <div className="planCardsInner">
+          {PLANS.map((p) => {
+            const isSelected = selected === p.id
+            return (
+              <label key={p.id} className={`planCard ${isSelected ? 'isSelected' : ''}`}>
+                <input
+                  type="radio"
+                  name="plan"
+                  value={p.id}
+                  checked={isSelected}
+                  onChange={() => setSelected(p.id)}
+                  className="srOnly"
+                />
+                <div className="planCardHeader">
+                  {p.isCurrent && <div className="planCardBadge">CURRENT PLAN</div>}
+                  {isSelected && <div className="planCardSelectedBadge">✓</div>}
+                  <h3 className="planCardName">{p.name.replace('\n', ' ')}</h3>
+                  <div className="planCardQuality">{p.resolution}</div>
+                </div>
+                <div className="planCardBody">
+                  <div className="planCardPrice">
+                    {p.price} <span>/month</span>
+                  </div>
+                  <ul className="planCardFeatures">
+                    <li>
+                      <span>Video Quality</span>
+                      <strong>{p.quality}</strong>
+                    </li>
+                    <li>
+                      <span>Resolution</span>
+                      <strong>{p.resolution}</strong>
+                    </li>
+                    <li>
+                      <span>Spatial Audio (immersive sound)</span>
+                      <strong>{p.id === 'premium' ? 'Included' : '—'}</strong>
+                    </li>
+                    <li>
+                      <span>Supported devices</span>
+                      <strong>TV, computer, mobile phone, tablet</strong>
+                    </li>
+                    <li>
+                      <span>Devices your household can watch at the same time</span>
+                      <strong>{p.screens}</strong>
+                    </li>
+                    <li>
+                      <span>Download devices</span>
+                      <strong>{p.downloads ? p.screens : 0}</strong>
+                    </li>
+                    <li>
+                      <span>Ads</span>
+                      <strong>{p.id === 'standard-ads' ? 'Yes' : 'No ads'}</strong>
+                    </li>
+                  </ul>
+                </div>
+              </label>
+            )
+          })}
+        </div>
+
+        <div className="planCta">
+          <button className="planCtaCancel" onClick={onClose}>
+            Cancel
+          </button>
+          <button
+            className="planCtaConfirm"
+            onClick={onClose}
+            disabled={selected === 'premium'}
+          >
+            {selected === 'premium' ? 'Current Plan' : 'Change Plan'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function AccountPage({ currentProfileId }: Props) {
+  const [showPlanModal, setShowPlanModal] = useState(false)
+
   return (
     <div className="accountPage">
       <header className="accountHeader">
@@ -41,7 +169,7 @@ export function AccountPage({ currentProfileId }: Props) {
 
           <section className="accountSection">
             <div className="accountSectionLeft">
-              <h2 className="accountSectionTitle">Membership & Billing</h2>
+              <h2 className="accountSectionTitle">Membership &amp; Billing</h2>
               <button className="accountCancelButton">Cancel Membership</button>
             </div>
             <div className="accountSectionRight">
@@ -87,15 +215,23 @@ export function AccountPage({ currentProfileId }: Props) {
             </div>
             <div className="accountSectionRight">
               <div className="accountRow">
-                <span className="accountStrong">Premium <span className="accountBadge">ULTRA HD</span></span>
-                <a href="#" className="accountLink">Change plan</a>
+                <span className="accountStrong">
+                  Premium <span className="accountBadge">ULTRA HD</span>
+                </span>
+                <button
+                  className="accountLink"
+                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+                  onClick={() => setShowPlanModal(true)}
+                >
+                  Change plan
+                </button>
               </div>
             </div>
           </section>
 
           <section className="accountSection accountSectionLast">
             <div className="accountSectionLeft">
-              <h2 className="accountSectionTitle">Profile & Parental Controls</h2>
+              <h2 className="accountSectionTitle">Profile &amp; Parental Controls</h2>
             </div>
             <div className="accountSectionRight">
               {defaultProfiles.map((p) => (
@@ -114,7 +250,6 @@ export function AccountPage({ currentProfileId }: Props) {
               ))}
             </div>
           </section>
-
         </div>
       </main>
 
@@ -131,6 +266,8 @@ export function AccountPage({ currentProfileId }: Props) {
           </div>
         </div>
       </footer>
+
+      {showPlanModal && <PlanModal onClose={() => setShowPlanModal(false)} />}
     </div>
   )
 }

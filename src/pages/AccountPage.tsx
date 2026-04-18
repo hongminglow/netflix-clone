@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NetflixLogo } from '../components/NetflixLogo'
 import { defaultProfiles } from '../data/profiles'
 import { navigate, routes } from '../lib/router'
@@ -43,6 +43,15 @@ const PLANS = [
 
 function PlanModal({ onClose }: { onClose: () => void }) {
   const [selected, setSelected] = useState<string>('premium')
+
+  useEffect(() => {
+    // Prevent body scrolling while modal is open
+    const originalOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = originalOverflow
+    }
+  }, [])
 
   return (
     <div className="planModalOverlay" onClick={onClose} role="dialog" aria-modal="true" aria-label="Change Plan">

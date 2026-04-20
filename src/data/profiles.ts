@@ -1,4 +1,4 @@
-import { image } from './catalog'
+import { image } from '@/data/catalog'
 
 export type Profile = { id: string; name: string; avatarUrl: string }
 

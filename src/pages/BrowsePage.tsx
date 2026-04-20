@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Modal } from '../components/Modal'
-import { NetflixLogo } from '../components/NetflixLogo'
-import { ProfileDropdown } from '../components/ProfileDropdown'
-import { Row } from '../components/Row'
-import { getMovie, image, movies, rows, type Movie } from '../data/catalog'
-import { useMyList } from '../hooks/useMyList'
-import { useI18n } from '../i18n'
-import { buildWatchUrl, navigate, routes } from '../lib/router'
-import { SmartImage } from '../components/SmartImage'
+import { Modal } from '@/components/Modal'
+import { NetflixLogo } from '@/components/NetflixLogo'
+import { ProfileDropdown } from '@/components/ProfileDropdown'
+import { Row } from '@/components/Row'
+import { getMovie, image, movies, rows, type Movie } from '@/data/catalog'
+import { useMyList } from '@/hooks/useMyList'
+import { useI18n } from '@/i18n'
+import { buildWatchUrl, navigate, routes } from '@/lib/router'
+import { SmartImage } from '@/components/SmartImage'
 
 type Props = {
   profile: { id: string; name: string }

@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react'
-import { NetflixLogo } from '../components/NetflixLogo'
-import { image } from '../data/catalog'
-import { useI18n } from '../i18n'
-import { navigate, routes } from '../lib/router'
-import { verifyUser } from '../lib/users'
+import { NetflixLogo } from '@/components/NetflixLogo'
+import { image } from '@/data/catalog'
+import { useI18n } from '@/i18n'
+import { navigate, routes } from '@/lib/router'
+import { verifyUser } from '@/lib/users'
 
 type Props = {
   onLogin: (user: { id: string; email: string }) => void

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { defaultProfiles } from '../data/profiles'
-import { useI18n } from '../i18n'
-import { navigate, routes } from '../lib/router'
+import { defaultProfiles } from '@/data/profiles'
+import { useI18n } from '@/i18n'
+import { navigate, routes } from '@/lib/router'
 
 type Props = {
   currentProfileId: string

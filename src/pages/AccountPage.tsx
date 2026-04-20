@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { NetflixLogo } from '../components/NetflixLogo'
-import { defaultProfiles } from '../data/profiles'
-import { navigate, routes } from '../lib/router'
+import { NetflixLogo } from '@/components/NetflixLogo'
+import { defaultProfiles } from '@/data/profiles'
+import { navigate, routes } from '@/lib/router'
 
 type Props = {
   currentProfileId: string

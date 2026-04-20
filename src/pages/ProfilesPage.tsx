@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { NetflixLogo } from '../components/NetflixLogo'
-import { defaultProfiles } from '../data/profiles'
-import { useI18n } from '../i18n'
-import { navigate, routes } from '../lib/router'
+import { NetflixLogo } from '@/components/NetflixLogo'
+import { defaultProfiles } from '@/data/profiles'
+import { useI18n } from '@/i18n'
+import { navigate, routes } from '@/lib/router'
 
 type Props = {
   onSelect: (profile: { id: string; name: string }) => void

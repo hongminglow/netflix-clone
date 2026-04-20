@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { useStore } from '../store'
+import { useStore } from '@/store'
 
 export function useMyList(profileId: string) {
   const { myLists, addToList, removeFromList } = useStore()

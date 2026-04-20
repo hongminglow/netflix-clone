@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import useEmblaCarousel from 'embla-carousel-react'
-import type { Movie } from '../data/catalog'
-import { image } from '../data/catalog'
-import { SmartImage } from './SmartImage'
+import type { Movie } from '@/data/catalog'
+import { image } from '@/data/catalog'
+import { SmartImage } from '@/components/SmartImage'
 
 type Props = {
   title: string

@@ -1,4 +1,4 @@
-import { getMovieBySlug, slugify, movies } from '../data/catalog'
+import { getMovieBySlug, slugify, movies } from '@/data/catalog'
 
 export const routes = {
   home: '/',

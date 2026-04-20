@@ -1,6 +1,6 @@
-import { NetflixLogo } from '../components/NetflixLogo'
-import { defaultProfiles } from '../data/profiles'
-import { navigate, routes } from '../lib/router'
+import { NetflixLogo } from '@/components/NetflixLogo'
+import { defaultProfiles } from '@/data/profiles'
+import { navigate, routes } from '@/lib/router'
 
 export function EditProfilePage() {
   const params = new URLSearchParams(window.location.search)

@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
-import { VideoPlayer } from '../components/VideoPlayer'
-import { getMovie, movies } from '../data/catalog'
-import { getWatchMovieId, navigate, routes } from '../lib/router'
+import { VideoPlayer } from '@/components/VideoPlayer'
+import { getMovie, movies } from '@/data/catalog'
+import { getWatchMovieId, navigate, routes } from '@/lib/router'
 
 type Props = {
   profile: { id: string; name: string }

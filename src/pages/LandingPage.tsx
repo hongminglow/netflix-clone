@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react'
-import { FaqAccordion } from '../components/FaqAccordion'
-import { NetflixLogo } from '../components/NetflixLogo'
-import { SmartImage } from '../components/SmartImage'
-import { TrendingRow } from '../components/TrendingRow'
-import { movies } from '../data/catalog'
-import { image } from '../data/catalog'
-import { useI18n, type Lang } from '../i18n'
-import { navigate, routes } from '../lib/router'
+import { FaqAccordion } from '@/components/FaqAccordion'
+import { NetflixLogo } from '@/components/NetflixLogo'
+import { SmartImage } from '@/components/SmartImage'
+import { TrendingRow } from '@/components/TrendingRow'
+import { movies } from '@/data/catalog'
+import { image } from '@/data/catalog'
+import { useI18n, type Lang } from '@/i18n'
+import { navigate, routes } from '@/lib/router'
 
 type Props = {
   authed: boolean

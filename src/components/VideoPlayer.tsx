@@ -1,167 +1,194 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { useI18n } from '@/i18n'
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useI18n } from "@/i18n";
 
 type Props = {
-  src: string
-  poster?: string
-  title?: string
-  onExit?: () => void
-}
+  src: string;
+  poster?: string;
+  title?: string;
+  onExit?: () => void;
+};
 
 function clamp(v: number, min: number, max: number) {
-  return Math.max(min, Math.min(max, v))
+  return Math.max(min, Math.min(max, v));
 }
 
 function formatTime(seconds: number) {
-  if (!Number.isFinite(seconds) || seconds < 0) return '0:00'
-  const s = Math.floor(seconds)
-  const h = Math.floor(s / 3600)
-  const m = Math.floor((s % 3600) / 60)
-  const ss = String(s % 60).padStart(2, '0')
-  if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${ss}`
-  return `${m}:${ss}`
+  if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
+  const s = Math.floor(seconds);
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const ss = String(s % 60).padStart(2, "0");
+  if (h > 0) return `${h}:${String(m).padStart(2, "0")}:${ss}`;
+  return `${m}:${ss}`;
 }
 
 export function VideoPlayer({ src, poster, title, onExit }: Props) {
-  const { t } = useI18n()
-  const videoRef = useRef<HTMLVideoElement | null>(null)
-  const rootRef = useRef<HTMLDivElement | null>(null)
+  const { t } = useI18n();
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const rootRef = useRef<HTMLDivElement | null>(null);
 
-  const [ready, setReady] = useState(false)
-  const [playing, setPlaying] = useState(false)
-  const [muted, setMuted] = useState(false)
-  const [volume, setVolume] = useState(1)
-  const [time, setTime] = useState(0)
-  const [duration, setDuration] = useState(0)
-  const [seeking, setSeeking] = useState(false)
-  const [hovering, setHovering] = useState(false)
+  const [ready, setReady] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const [muted, setMuted] = useState(false);
+  const [volume, setVolume] = useState(1);
+  const [time, setTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [seeking, setSeeking] = useState(false);
+  const [hovering, setHovering] = useState(false);
+  const [previewPct, setPreviewPct] = useState<number | null>(null);
+  const [captionsOn, setCaptionsOn] = useState(false);
 
   const progress = useMemo(() => {
-    if (!duration) return 0
-    return clamp(time / duration, 0, 1)
-  }, [duration, time])
+    if (!duration) return 0;
+    return clamp(time / duration, 0, 1);
+  }, [duration, time]);
+
+  const progressFill = Math.round(progress * 100);
+  const volumeFill = Math.round((muted ? 0 : volume) * 100);
+  const previewTime =
+    previewPct === null ? null : formatTime((duration || 0) * previewPct);
+  const progressTrack = useMemo(
+    () =>
+      `linear-gradient(90deg, #e50914 0%, #e50914 ${progressFill}%, rgba(255,255,255,0.28) ${progressFill}%, rgba(255,255,255,0.28) 100%)`,
+    [progressFill],
+  );
+  const volumeTrack = useMemo(
+    () =>
+      `linear-gradient(90deg, #ffffff 0%, #ffffff ${volumeFill}%, rgba(255,255,255,0.26) ${volumeFill}%, rgba(255,255,255,0.26) 100%)`,
+    [volumeFill],
+  );
 
   const togglePlay = async () => {
-    const v = videoRef.current
-    if (!v) return
-    if (v.paused) await v.play()
-    else v.pause()
-  }
+    const v = videoRef.current;
+    if (!v) return;
+    if (v.paused) await v.play();
+    else v.pause();
+  };
 
   const toggleMute = () => {
-    const v = videoRef.current
-    if (!v) return
-    v.muted = !v.muted
-    setMuted(v.muted)
-  }
+    const v = videoRef.current;
+    if (!v) return;
+    v.muted = !v.muted;
+    setMuted(v.muted);
+  };
 
   const setVol = (next: number) => {
-    const v = videoRef.current
-    if (!v) return
-    const vv = clamp(next, 0, 1)
-    v.volume = vv
-    setVolume(vv)
+    const v = videoRef.current;
+    if (!v) return;
+    const vv = clamp(next, 0, 1);
+    v.volume = vv;
+    setVolume(vv);
     if (vv > 0 && v.muted) {
-      v.muted = false
-      setMuted(false)
+      v.muted = false;
+      setMuted(false);
     }
-  }
+  };
 
   const seekTo = (pct: number) => {
-    const v = videoRef.current
-    if (!v || !Number.isFinite(v.duration) || v.duration <= 0) return
-    v.currentTime = clamp(pct, 0, 1) * v.duration
-  }
+    const v = videoRef.current;
+    if (!v || !Number.isFinite(v.duration) || v.duration <= 0) return;
+    v.currentTime = clamp(pct, 0, 1) * v.duration;
+  };
+
+  const skipBy = (seconds: number) => {
+    const v = videoRef.current;
+    if (!v) return;
+    const total =
+      Number.isFinite(v.duration) && v.duration > 0 ? v.duration : duration;
+    const nextTime = clamp(v.currentTime + seconds, 0, total || 0);
+    v.currentTime = nextTime;
+    setTime(nextTime);
+  };
 
   const requestFullscreen = async () => {
-    const root = rootRef.current
-    if (!root) return
-    if (document.fullscreenElement) await document.exitFullscreen()
-    else await root.requestFullscreen()
-  }
+    const root = rootRef.current;
+    if (!root) return;
+    if (document.fullscreenElement) await document.exitFullscreen();
+    else await root.requestFullscreen();
+  };
 
   useEffect(() => {
-    const v = videoRef.current
-    if (!v) return
+    const v = videoRef.current;
+    if (!v) return;
 
     const onLoaded = () => {
-      setReady(true)
-      setDuration(Number.isFinite(v.duration) ? v.duration : 0)
-    }
-    const onPlay = () => setPlaying(true)
-    const onPause = () => setPlaying(false)
+      setReady(true);
+      setDuration(Number.isFinite(v.duration) ? v.duration : 0);
+    };
+    const onPlay = () => setPlaying(true);
+    const onPause = () => setPlaying(false);
     const onTime = () => {
-      if (seeking) return
-      setTime(v.currentTime)
-    }
+      if (seeking) return;
+      setTime(v.currentTime);
+    };
     const onVol = () => {
-      setMuted(v.muted)
-      setVolume(v.volume)
-    }
+      setMuted(v.muted);
+      setVolume(v.volume);
+    };
 
-    v.addEventListener('loadedmetadata', onLoaded)
-    v.addEventListener('play', onPlay)
-    v.addEventListener('pause', onPause)
-    v.addEventListener('timeupdate', onTime)
-    v.addEventListener('volumechange', onVol)
+    v.addEventListener("loadedmetadata", onLoaded);
+    v.addEventListener("play", onPlay);
+    v.addEventListener("pause", onPause);
+    v.addEventListener("timeupdate", onTime);
+    v.addEventListener("volumechange", onVol);
 
     return () => {
-      v.removeEventListener('loadedmetadata', onLoaded)
-      v.removeEventListener('play', onPlay)
-      v.removeEventListener('pause', onPause)
-      v.removeEventListener('timeupdate', onTime)
-      v.removeEventListener('volumechange', onVol)
-    }
-  }, [seeking])
+      v.removeEventListener("loadedmetadata", onLoaded);
+      v.removeEventListener("play", onPlay);
+      v.removeEventListener("pause", onPause);
+      v.removeEventListener("timeupdate", onTime);
+      v.removeEventListener("volumechange", onVol);
+    };
+  }, [seeking]);
 
   useEffect(() => {
-    const root = rootRef.current
-    if (!root) return
+    const root = rootRef.current;
+    if (!root) return;
 
-    let t: number | null = null
+    let t: number | null = null;
     const show = () => {
-      setHovering(true)
-      if (t) window.clearTimeout(t)
-      t = window.setTimeout(() => setHovering(false), 2200)
-    }
+      setHovering(true);
+      if (t) window.clearTimeout(t);
+      t = window.setTimeout(() => setHovering(false), 2200);
+    };
 
-    const onMove = () => show()
+    const onMove = () => show();
     const onKey = (e: KeyboardEvent) => {
-      const v = videoRef.current
-      if (!v) return
-      if (e.key === ' ') {
-        e.preventDefault()
-        togglePlay()
-        show()
+      const v = videoRef.current;
+      if (!v) return;
+      if (e.key === " ") {
+        e.preventDefault();
+        togglePlay();
+        show();
       }
-      if (e.key === 'f') {
-        requestFullscreen()
-        show()
+      if (e.key === "f") {
+        requestFullscreen();
+        show();
       }
-      if (e.key === 'm') {
-        toggleMute()
-        show()
+      if (e.key === "m") {
+        toggleMute();
+        show();
       }
-      if (e.key === 'ArrowLeft') {
-        v.currentTime = Math.max(0, v.currentTime - 10)
-        show()
+      if (e.key === "ArrowLeft") {
+        v.currentTime = Math.max(0, v.currentTime - 10);
+        show();
       }
-      if (e.key === 'ArrowRight') {
-        v.currentTime = Math.min(v.duration || 0, v.currentTime + 10)
-        show()
+      if (e.key === "ArrowRight") {
+        v.currentTime = Math.min(v.duration || 0, v.currentTime + 10);
+        show();
       }
-      if (e.key === 'Escape' && onExit) onExit()
-    }
+      if (e.key === "Escape" && onExit) onExit();
+    };
 
     // Notice we do NOT show() on mount here automatically
-    root.addEventListener('mousemove', onMove)
-    window.addEventListener('keydown', onKey)
+    root.addEventListener("mousemove", onMove);
+    window.addEventListener("keydown", onKey);
     return () => {
-      if (t) window.clearTimeout(t)
-      root.removeEventListener('mousemove', onMove)
-      window.removeEventListener('keydown', onKey)
-    }
-  }, [onExit])
+      if (t) window.clearTimeout(t);
+      root.removeEventListener("mousemove", onMove);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [onExit]);
 
   return (
     <div className="player" ref={rootRef}>
@@ -175,7 +202,7 @@ export function VideoPlayer({ src, poster, title, onExit }: Props) {
         onClick={togglePlay}
       />
 
-      <div className={`playerHud ${hovering ? 'isVisible' : ''}`}>
+      <div className={`playerHud ${hovering ? "isVisible" : ""}`}>
         <div className="playerTop" onMouseMove={(e) => e.stopPropagation()}>
           {onExit && (
             <button className="playerBack" onClick={onExit} aria-label="Back">
@@ -185,7 +212,7 @@ export function VideoPlayer({ src, poster, title, onExit }: Props) {
                   fill="currentColor"
                 />
               </svg>
-              <span>{t('player_back')}</span>
+              <span>{t("player_back")}</span>
             </button>
           )}
           <div className="playerTitle">{title}</div>
@@ -193,22 +220,46 @@ export function VideoPlayer({ src, poster, title, onExit }: Props) {
 
         <div className="playerBottom" onMouseMove={(e) => e.stopPropagation()}>
           <div className="playerProgress">
-            <input
-              aria-label="Seek"
-              type="range"
-              min={0}
-              max={1000}
-              value={Math.round(progress * 1000)}
-              onMouseDown={() => setSeeking(true)}
-              onMouseUp={() => setSeeking(false)}
-              onTouchStart={() => setSeeking(true)}
-              onTouchEnd={() => setSeeking(false)}
-              onChange={(e) => {
-                const pct = Number(e.target.value) / 1000
-                setTime(pct * (duration || 0))
-                seekTo(pct)
-              }}
-            />
+            <div
+              className="playerSeekRail"
+              onMouseLeave={() => setPreviewPct(null)}
+            >
+              {previewTime && (
+                <div
+                  className="playerPreviewBubble"
+                  style={{ left: `${(previewPct ?? 0) * 100}%` }}
+                >
+                  {previewTime}
+                </div>
+              )}
+              <input
+                aria-label="Seek"
+                className="playerSlider playerSliderSeek"
+                type="range"
+                min={0}
+                max={1000}
+                value={Math.round(progress * 1000)}
+                style={{ background: progressTrack }}
+                onMouseDown={() => setSeeking(true)}
+                onMouseUp={() => setSeeking(false)}
+                onTouchStart={() => setSeeking(true)}
+                onTouchEnd={() => setSeeking(false)}
+                onMouseMove={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  if (!rect.width) return;
+                  setPreviewPct(
+                    clamp((e.clientX - rect.left) / rect.width, 0, 1),
+                  );
+                }}
+                onFocus={() => setPreviewPct(progress)}
+                onBlur={() => setPreviewPct(null)}
+                onChange={(e) => {
+                  const pct = Number(e.target.value) / 1000;
+                  setTime(pct * (duration || 0));
+                  seekTo(pct);
+                }}
+              />
+            </div>
             <div className="playerTime">
               {formatTime(time)} / {formatTime(duration)}
             </div>
@@ -216,10 +267,17 @@ export function VideoPlayer({ src, poster, title, onExit }: Props) {
 
           <div className="playerControls">
             <div className="playerControlsLeft">
-              <button className="playerIcon" onClick={togglePlay} aria-label="Play">
+              <button
+                className="playerIcon playerIconPrimary"
+                onClick={togglePlay}
+                aria-label="Play"
+              >
                 {playing ? (
                   <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M7 6h4v12H7V6Zm6 0h4v12h-4V6Z" fill="currentColor" />
+                    <path
+                      d="M7 6h4v12H7V6Zm6 0h4v12h-4V6Z"
+                      fill="currentColor"
+                    />
                   </svg>
                 ) : (
                   <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -228,7 +286,39 @@ export function VideoPlayer({ src, poster, title, onExit }: Props) {
                 )}
               </button>
 
-              <button className="playerIcon" onClick={toggleMute} aria-label="Mute">
+              <button
+                className="playerIcon playerQuickAction"
+                onClick={() => skipBy(-10)}
+                aria-label="Rewind 10 seconds"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="m11 18-8-6 8-6v12Zm10 0-8-6 8-6v12Z"
+                    fill="currentColor"
+                  />
+                </svg>
+                <span className="playerQuickLabel">10</span>
+              </button>
+
+              <button
+                className="playerIcon playerQuickAction"
+                onClick={() => skipBy(10)}
+                aria-label="Forward 10 seconds"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="m3 18 8-6-8-6v12Zm10 0 8-6-8-6v12Z"
+                    fill="currentColor"
+                  />
+                </svg>
+                <span className="playerQuickLabel">10</span>
+              </button>
+
+              <button
+                className="playerIcon"
+                onClick={toggleMute}
+                aria-label="Mute"
+              >
                 {muted || volume === 0 ? (
                   <svg viewBox="0 0 24 24" aria-hidden="true">
                     <path
@@ -246,19 +336,44 @@ export function VideoPlayer({ src, poster, title, onExit }: Props) {
                 )}
               </button>
 
-              <div className="playerVolume">
-                <input
-                  aria-label="Volume"
-                  type="range"
-                  min={0}
-                  max={100}
-                  value={Math.round(volume * 100)}
-                  onChange={(e) => setVol(Number(e.target.value) / 100)}
-                />
+              <div className="playerVolumeShell">
+                <div className="playerVolume">
+                  <input
+                    aria-label="Volume"
+                    className="playerSlider playerSliderVolume"
+                    type="range"
+                    min={0}
+                    max={100}
+                    value={Math.round(volume * 100)}
+                    style={{ background: volumeTrack }}
+                    onChange={(e) => setVol(Number(e.target.value) / 100)}
+                  />
+                </div>
+                <span className="playerVolumeValue">{volumeFill}%</span>
               </div>
             </div>
 
             <div className="playerControlsRight">
+              <div className="playerMetaGroup" aria-hidden="true">
+                <span className="playerMetaBadge">S1:E1</span>
+                <span className="playerQualityBadge">HD</span>
+              </div>
+              <button
+                className={`playerIcon playerQuickAction ${captionsOn ? "isActive" : ""}`}
+                onClick={() => setCaptionsOn((value) => !value)}
+                aria-label="Audio and subtitles"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M4 6h16v10H8l-4 4V6Zm4 4h8M8 13h5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
               <button
                 className="playerIcon"
                 onClick={requestFullscreen}
@@ -276,7 +391,7 @@ export function VideoPlayer({ src, poster, title, onExit }: Props) {
         </div>
       </div>
 
-      {!ready && <div className="playerLoading">{t('player_loading')}</div>}
+      {!ready && <div className="playerLoading">{t("player_loading")}</div>}
     </div>
-  )
+  );
 }

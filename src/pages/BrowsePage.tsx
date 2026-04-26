@@ -1,50 +1,62 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { Modal } from '@/components/Modal'
-import { NetflixLogo } from '@/components/NetflixLogo'
-import { ProfileDropdown } from '@/components/ProfileDropdown'
-import { Row } from '@/components/Row'
-import { getMovie, image, movies, rows, type Movie } from '@/data/catalog'
-import { useMyList } from '@/hooks/useMyList'
-import { useI18n } from '@/i18n'
-import { buildWatchUrl, navigate, routes } from '@/lib/router'
-import { SmartImage } from '@/components/SmartImage'
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Modal } from "@/components/Modal";
+import { NetflixLogo } from "@/components/NetflixLogo";
+import { ProfileDropdown } from "@/components/ProfileDropdown";
+import { Row } from "@/components/Row";
+import { getMovie, image, movies, rows, type Movie } from "@/data/catalog";
+import { useMyList } from "@/hooks/useMyList";
+import { useLocalStorageState } from "@/hooks/useLocalStorageState";
+import { useI18n } from "@/i18n";
+import { buildWatchUrl, navigate, routes } from "@/lib/router";
+import { SmartImage } from "@/components/SmartImage";
 
 type Props = {
-  profile: { id: string; name: string }
-  onSignOut: () => void
-  view?: 'home' | 'myList'
+  profile: { id: string; name: string };
+  onSignOut: () => void;
+  view?: "home" | "myList";
+};
+
+function getMatchPct(id: string) {
+  const sum = id
+    .split("")
+    .reduce((total, char) => total + char.charCodeAt(0), 0);
+  return 85 + (sum % 14);
 }
 
-export function BrowsePage({ profile, onSignOut, view = 'home' }: Props) {
-  const { t } = useI18n()
-  const [solidNav, setSolidNav] = useState(false)
-  const [query, setQuery] = useState('')
-  const [isSearchOpen, setIsSearchOpen] = useState(false)
-  const [selected, setSelected] = useState<Movie | null>(null)
-  const myList = useMyList(profile.id)
-  const searchInputRef = useRef<HTMLInputElement>(null)
+export function BrowsePage({ profile, onSignOut, view = "home" }: Props) {
+  const { t } = useI18n();
+  const [solidNav, setSolidNav] = useState(false);
+  const [query, setQuery] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [selected, setSelected] = useState<Movie | null>(null);
+  const myList = useMyList(profile.id);
+  const [likedIds, setLikedIds] = useLocalStorageState<string[]>(
+    `nf.likes.${profile.id}`,
+    [],
+  );
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const onScroll = () => setSolidNav(window.scrollY > 12)
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+    const onScroll = () => setSolidNav(window.scrollY > 12);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const handleSearchClick = () => {
-    setIsSearchOpen(true)
-    setTimeout(() => searchInputRef.current?.focus(), 50)
-  }
+    setIsSearchOpen(true);
+    setTimeout(() => searchInputRef.current?.focus(), 50);
+  };
 
   const handleSearchBlur = () => {
-    if (!query) setIsSearchOpen(false)
-  }
+    if (!query) setIsSearchOpen(false);
+  };
 
-  const hero = useMemo(() => getMovie('n1') ?? movies[0], [])
+  const hero = useMemo(() => getMovie("n1") ?? movies[0], []);
 
   const filteredRows = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    if (!q) return rows
+    const q = query.trim().toLowerCase();
+    if (!q) return rows;
     const ids = new Set(
       movies
         .filter(
@@ -54,66 +66,90 @@ export function BrowsePage({ profile, onSignOut, view = 'home' }: Props) {
             m.genres.some((g) => g.toLowerCase().includes(q)),
         )
         .map((m) => m.id),
-    )
+    );
     return rows
       .map((r) => ({ ...r, items: r.items.filter((id) => ids.has(id)) }))
-      .filter((r) => r.items.length > 0)
-  }, [query])
+      .filter((r) => r.items.length > 0);
+  }, [query]);
 
   const visibleRows = useMemo(() => {
-    if (view === 'myList') {
+    if (view === "myList") {
       return [
         {
-          id: 'my_list',
-          title: t('nav_myList'),
+          id: "my_list",
+          title: t("nav_myList"),
           items: myList.ids,
         },
-      ].filter((r) => r.items.length > 0)
+      ].filter((r) => r.items.length > 0);
     }
 
-    const base: { id: string, title: string, items: readonly string[] }[] = [...filteredRows]
-    if (myList.ids.length === 0) return base
+    const base: { id: string; title: string; items: readonly string[] }[] = [
+      ...filteredRows,
+    ];
+    if (myList.ids.length === 0) return base;
 
-    const insertIdx = base.findIndex((r) => r.id === 'r2')
-    const finalIdx = insertIdx !== -1 ? insertIdx + 1 : Math.min(2, base.length)
+    const insertIdx = base.findIndex((r) => r.id === "r2");
+    const finalIdx =
+      insertIdx !== -1 ? insertIdx + 1 : Math.min(2, base.length);
 
-    base.splice(finalIdx, 0, { id: 'my_list', title: t('nav_myList'), items: myList.ids })
-    return base
-  }, [filteredRows, myList.ids, t, view])
+    base.splice(finalIdx, 0, {
+      id: "my_list",
+      title: t("nav_myList"),
+      items: myList.ids,
+    });
+    return base;
+  }, [filteredRows, myList.ids, t, view]);
+
+  const likedSet = useMemo(() => new Set(likedIds), [likedIds]);
+
+  const toggleLike = (movieId: string) => {
+    setLikedIds((current) =>
+      current.includes(movieId)
+        ? current.filter((id) => id !== movieId)
+        : [...current, movieId],
+    );
+  };
 
   return (
     <div className="browse">
-      <header className={`browseTopBar ${solidNav ? 'isSolid' : ''}`}>
+      <header className={`browseTopBar ${solidNav ? "isSolid" : ""}`}>
         <div className="browseTopBarInner">
-          <button className="browseBrand" onClick={() => navigate(routes.browse)} aria-label="Browse">
+          <button
+            className="browseBrand"
+            onClick={() => navigate(routes.browse)}
+            aria-label="Browse"
+          >
             <NetflixLogo className="nfLogo nfLogoSmall" />
           </button>
           <nav className="browseNav" aria-label="Primary">
             <button
-              className={`browseNavLink ${view === 'home' ? 'isActive' : ''}`}
+              className={`browseNavLink ${view === "home" ? "isActive" : ""}`}
               onClick={() => navigate(routes.browse)}
             >
-              {t('nav_home')}
+              {t("nav_home")}
             </button>
             <button className="browseNavLink" onClick={() => {}}>
-              {t('nav_tv')}
+              {t("nav_tv")}
             </button>
             <button className="browseNavLink" onClick={() => {}}>
-              {t('nav_movies')}
+              {t("nav_movies")}
             </button>
             <button className="browseNavLink" onClick={() => {}}>
-              {t('nav_new')}
+              {t("nav_new")}
             </button>
             <button
-              className={`browseNavLink ${view === 'myList' ? 'isActive' : ''}`}
+              className={`browseNavLink ${view === "myList" ? "isActive" : ""}`}
               onClick={() => navigate(routes.myList)}
             >
-              {t('nav_myList')}
+              {t("nav_myList")}
             </button>
           </nav>
 
           <div className="browseActions">
-            <label className={`browseSearch ${isSearchOpen ? 'isOpen' : ''}`} onClick={handleSearchClick}>
+            <label
+              className={`browseSearch ${isSearchOpen ? "isOpen" : ""}`}
+              onClick={handleSearchClick}
+            >
               <span className="srOnly">Search</span>
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path
@@ -126,67 +162,79 @@ export function BrowsePage({ profile, onSignOut, view = 'home' }: Props) {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onBlur={handleSearchBlur}
-                placeholder={t('browse_search_placeholder')}
+                placeholder={t("browse_search_placeholder")}
               />
             </label>
-            <ProfileDropdown currentProfileId={profile.id} onSignOut={onSignOut} />
+            <button className="notifBtn" aria-label="Notifications">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 22a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2Zm6-6V11a6 6 0 0 0-5-5.91V4a1 1 0 0 0-2 0v1.09A6 6 0 0 0 6 11v5l-2 2v1h16v-1l-2-2Z" />
+              </svg>
+              <span className="notifDot" aria-hidden="true" />
+            </button>
+            <ProfileDropdown
+              currentProfileId={profile.id}
+              onSignOut={onSignOut}
+            />
           </div>
         </div>
       </header>
 
       <main>
-        {view === 'home' && (
+        {view === "home" && (
           <section className="billboard">
-          <div className="billboardBg">
-            <SmartImage
-              src={hero.backdropUrl}
-              fallbackSrc={image(
-                `cinematic wide still for "${hero.title}", premium streaming backdrop, dramatic lighting, deep blacks, high contrast, no text`,
-                'landscape_16_9',
-              )}
-              alt=""
-            />
-            <div className="billboardShade" />
-          </div>
-          <div className="billboardInner">
-            <div className="billboardMeta">
-              <div className="billboardLabel">{t('billboard_label')}</div>
-              <h1 className="billboardTitle">{hero.title}</h1>
-              <p className="billboardSynopsis">{hero.synopsis}</p>
-              <div className="billboardButtons">
-                <button
-                  className="nfButton nfButtonBig nfButtonLight"
-                  onClick={() => navigate(buildWatchUrl(hero.id))}
-                >
-                  <span className="nfIcon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24">
-                      <path d="M8 5v14l12-7L8 5Z" fill="currentColor" />
-                    </svg>
-                  </span>
-                  {t('play')}
-                </button>
-                <button
-                  className="nfButton nfButtonBig nfButtonDim"
-                  onClick={() => setSelected(hero)}
-                >
-                  <span className="nfIcon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24">
-                      <path
-                        d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 9V7h-2v4H7v2h4v4h2v-4h4v-2h-4Z"
-                        fill="currentColor"
-                      />
-                    </svg>
-                  </span>
-                  {t('more_info')}
-                </button>
-              </div>
+            <div className="billboardBg">
+              <SmartImage
+                src={hero.backdropUrl}
+                fallbackSrc={image(
+                  `cinematic wide still for "${hero.title}", premium streaming backdrop, dramatic lighting, deep blacks, high contrast, no text`,
+                  "landscape_16_9",
+                )}
+                alt=""
+              />
+              <div className="billboardShade" />
             </div>
-            <div className="billboardFade" />
-          </div>
+            <div className="billboardInner">
+              <div className="billboardMeta">
+                <div className="billboardLabel">{t("billboard_label")}</div>
+                <h1 className="billboardTitle">{hero.title}</h1>
+                <p className="billboardSynopsis">{hero.synopsis}</p>
+                <div className="billboardButtons">
+                  <button
+                    className="nfButton nfButtonBig nfButtonLight"
+                    onClick={() => navigate(buildWatchUrl(hero.id))}
+                  >
+                    <span className="nfIcon nfIconPlay" aria-hidden="true">
+                      <svg viewBox="0 0 24 24">
+                        <path
+                          d="M6.5 4.5v15L19 12 6.5 4.5Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </span>
+                    {t("play")}
+                  </button>
+                  <button
+                    className="nfButton nfButtonBig nfButtonDim"
+                    onClick={() => setSelected(hero)}
+                  >
+                    <span className="nfIcon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24">
+                        <path
+                          d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 9V7h-2v4H7v2h4v4h2v-4h4v-2h-4Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </span>
+                    {t("more_info")}
+                  </button>
+                </div>
+              </div>
+              <div className="billboardFade" />
+            </div>
           </section>
         )}
 
-        <section className={`rows ${view === 'myList' ? 'isMyList' : ''}`}>
+        <section className={`rows ${view === "myList" ? "isMyList" : ""}`}>
           {visibleRows.map((r) => (
             <Row
               key={r.id}
@@ -195,7 +243,7 @@ export function BrowsePage({ profile, onSignOut, view = 'home' }: Props) {
               onSelect={(m) => setSelected(m)}
             />
           ))}
-          {view === 'myList' && visibleRows.length === 0 && (
+          {view === "myList" && visibleRows.length === 0 && (
             <div className="emptyListMessage">
               <p>You haven't added any titles to your list yet.</p>
             </div>
@@ -247,7 +295,11 @@ export function BrowsePage({ profile, onSignOut, view = 'home' }: Props) {
         </footer>
       </main>
 
-      <Modal open={!!selected} onClose={() => setSelected(null)} title={selected?.title}>
+      <Modal
+        open={!!selected}
+        onClose={() => setSelected(null)}
+        title={selected?.title}
+      >
         {selected && (
           <div className="details">
             <div className="detailsHero">
@@ -255,10 +307,12 @@ export function BrowsePage({ profile, onSignOut, view = 'home' }: Props) {
                 className="detailsHeroImg"
                 src={selected.backdropUrl}
                 fallbackSrc={[
-                  selected.posterUrl.includes('/w500/') ? selected.posterUrl.replace('/w500/', '/w780/') : selected.posterUrl,
+                  selected.posterUrl.includes("/w500/")
+                    ? selected.posterUrl.replace("/w500/", "/w780/")
+                    : selected.posterUrl,
                   image(
                     `cinematic wide still for "${selected.title}", premium streaming backdrop, dramatic lighting, deep blacks, high contrast, no text`,
-                    'landscape_16_9',
+                    "landscape_16_9",
                   ),
                 ]}
                 alt=""
@@ -271,17 +325,24 @@ export function BrowsePage({ profile, onSignOut, view = 'home' }: Props) {
                     className="nfButton nfButtonBig nfButtonLight"
                     onClick={() => navigate(buildWatchUrl(selected.id))}
                   >
-                    <span className="nfIcon" aria-hidden="true">
+                    <span className="nfIcon nfIconPlay" aria-hidden="true">
                       <svg viewBox="0 0 24 24">
-                        <path d="M8 5v14l12-7L8 5Z" fill="currentColor" />
+                        <path
+                          d="M6.5 4.5v15L19 12 6.5 4.5Z"
+                          fill="currentColor"
+                        />
                       </svg>
                     </span>
-                    {t('play')}
+                    {t("play")}
                   </button>
                   <button
-                    className={`nfButton nfButtonCircle ${myList.has(selected.id) ? 'isOn' : ''}`}
+                    className={`nfButton nfButtonCircle ${myList.has(selected.id) ? "isOn" : ""}`}
                     onClick={() => myList.toggle(selected.id)}
-                    aria-label={t('nav_myList')}
+                    aria-label={
+                      myList.has(selected.id)
+                        ? "Remove from My List"
+                        : "Add to My List"
+                    }
                   >
                     {myList.has(selected.id) ? (
                       <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -301,11 +362,28 @@ export function BrowsePage({ profile, onSignOut, view = 'home' }: Props) {
                       </svg>
                     )}
                   </button>
-                  <button className="nfButton nfButtonCircle" onClick={() => {}}>
+                  <button
+                    className={`nfButton nfButtonCircle ${likedSet.has(selected.id) ? "isLiked" : ""}`}
+                    onClick={() => toggleLike(selected.id)}
+                    aria-label={
+                      likedSet.has(selected.id) ? "Unlike title" : "Like title"
+                    }
+                  >
                     <svg viewBox="0 0 24 24" aria-hidden="true">
                       <path
-                        d="M12 17.3l-6.2 3.7 1.7-7.1L2 9.4l7.3-.6L12 2l2.7 6.8 7.3.6-5.5 4.5 1.7 7.1-6.2-3.7Z"
-                        fill="currentColor"
+                        d="M14 9V5a3 3 0 0 0-3-3l-1 7H6a2 2 0 0 0-2 2v1a2 2 0 0 0 .2.9l2 4A2 2 0 0 0 8 18h7a2 2 0 0 0 1.9-1.4l2-6.7A2 2 0 0 0 17 7h-3"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <path
+                        d="M6 9v9"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
                       />
                     </svg>
                   </button>
@@ -316,20 +394,26 @@ export function BrowsePage({ profile, onSignOut, view = 'home' }: Props) {
             <div className="detailsBody">
               <div className="detailsPrimary">
                 <div className="detailsMetaLine">
+                  <span className="detailsMatchPct">
+                    {getMatchPct(selected.id)}% Match
+                  </span>
                   <span className="detailsYear">{selected.year}</span>
                   <span className="detailsMaturity">{selected.maturity}</span>
                   <span className="detailsDur">{selected.duration}</span>
+                  <span className="detailsHdTag">HD</span>
                 </div>
                 <p className="detailsSynopsis">{selected.synopsis}</p>
               </div>
               <div className="detailsSecondary">
                 <div className="detailsKvp">
-                  <div className="detailsKey">{t('details_genres')}</div>
-                  <div className="detailsVal">{selected.genres.join(', ')}</div>
+                  <div className="detailsKey">{t("details_genres")}</div>
+                  <div className="detailsVal">{selected.genres.join(", ")}</div>
                 </div>
                 <div className="detailsKvp">
-                  <div className="detailsKey">{t('details_thisTitleIs')}</div>
-                  <div className="detailsVal">{t('details_thisTitleIs_val')}</div>
+                  <div className="detailsKey">{t("details_thisTitleIs")}</div>
+                  <div className="detailsVal">
+                    {t("details_thisTitleIs_val")}
+                  </div>
                 </div>
               </div>
             </div>
@@ -337,5 +421,5 @@ export function BrowsePage({ profile, onSignOut, view = 'home' }: Props) {
         )}
       </Modal>
     </div>
-  )
+  );
 }

@@ -1,62 +1,66 @@
-import { useMemo, useState } from 'react'
-import { FaqAccordion } from '@/components/FaqAccordion'
-import { NetflixLogo } from '@/components/NetflixLogo'
-import { SmartImage } from '@/components/SmartImage'
-import { TrendingRow } from '@/components/TrendingRow'
-import { movies } from '@/data/catalog'
-import { image } from '@/data/catalog'
-import { useI18n, type Lang } from '@/i18n'
-import { navigate, routes } from '@/lib/router'
+import { useMemo, useState } from "react";
+import { FaqAccordion } from "@/components/FaqAccordion";
+import { NetflixLogo } from "@/components/NetflixLogo";
+import { SmartImage } from "@/components/SmartImage";
+import { TrendingRow } from "@/components/TrendingRow";
+import { movies } from "@/data/catalog";
+import { image } from "@/data/catalog";
+import { useI18n, type Lang } from "@/i18n";
+import { navigate, routes } from "@/lib/router";
 
 type Props = {
-  authed: boolean
-  onGetStarted: () => void
-}
+  authed: boolean;
+  onGetStarted: () => void;
+};
 
 export function LandingPage({ authed, onGetStarted }: Props) {
-  const { lang, setLang, t } = useI18n()
-  const [email, setEmail] = useState('')
+  const { lang, setLang, t } = useI18n();
+  const [email, setEmail] = useState("");
 
   const tv = useMemo(
     () =>
       image(
-        'modern living room at night with a large TV, cinematic lighting, subtle red glow, realistic photo, shallow depth of field, no logos, no text',
-        'landscape_16_9',
+        "modern living room at night with a large TV, cinematic lighting, subtle red glow, realistic photo, shallow depth of field, no logos, no text",
+        "landscape_16_9",
       ),
     [],
-  )
+  );
 
   const mobile = useMemo(
     () =>
       image(
-        'hand holding a smartphone with a dark movie screen glow, moody lighting, realistic photography, no UI text, no logos',
-        'portrait_16_9',
+        "hand holding a smartphone with a dark movie screen glow, moody lighting, realistic photography, no UI text, no logos",
+        "portrait_16_9",
       ),
     [],
-  )
+  );
 
   const devices = useMemo(
     () =>
       image(
-        'minimal still life of modern devices (tv, laptop, tablet, phone) on dark background with soft cinematic rim light, realistic photo, no logos, no text',
-        'landscape_16_9',
+        "minimal still life of modern devices (tv, laptop, tablet, phone) on dark background with soft cinematic rim light, realistic photo, no logos, no text",
+        "landscape_16_9",
       ),
     [],
-  )
+  );
 
   const kids = useMemo(
     () =>
       image(
-        'cinematic family-friendly scene, child silhouette watching colorful animated characters on a screen, warm glow in dark room, realistic photography, no logos, no text',
-        'landscape_16_9',
+        "cinematic family-friendly scene, child silhouette watching colorful animated characters on a screen, warm glow in dark room, realistic photography, no logos, no text",
+        "landscape_16_9",
       ),
     [],
-  )
+  );
 
   return (
     <div className="landing">
       <header className="landingHeader">
-        <button className="landingBrand" onClick={() => navigate(routes.home)} aria-label="Home">
+        <button
+          className="landingBrand"
+          onClick={() => navigate(routes.home)}
+          aria-label="Home"
+        >
           <NetflixLogo className="nfLogo" />
         </button>
         <div className="landingHeaderRight">
@@ -83,7 +87,7 @@ export function LandingPage({ authed, onGetStarted }: Props) {
             className="nfButton nfButtonRed"
             onClick={() => navigate(authed ? routes.profiles : routes.login)}
           >
-            {t('sign_in')}
+            {t("sign_in")}
           </button>
         </div>
       </header>
@@ -93,26 +97,26 @@ export function LandingPage({ authed, onGetStarted }: Props) {
           <div className="heroBg">
             <div className="heroPosterGrid">
               {[
-                'https://image.tmdb.org/t/p/w342/uOOtwVbSr4QDjAGIifLDwpb2Pdl.jpg',
-                'https://image.tmdb.org/t/p/w342/1QdXdRYfktUSONkl1oD5gc6Be0s.jpg',
-                'https://image.tmdb.org/t/p/w342/7vjaCdMw15FEbXyLQTVa04URsPm.jpg',
-                'https://image.tmdb.org/t/p/w342/reEMJA1uzscCbkpeRJeTT2bjqUp.jpg',
-                'https://image.tmdb.org/t/p/w342/ggFHVNu6YYI5L9pCfOacjizRGt.jpg',
-                'https://image.tmdb.org/t/p/w342/zjg4jpK1Wp2kiRvtt5ND0kznako.jpg',
-                'https://image.tmdb.org/t/p/w342/vUUqzWa2LnHIVqkaKVlVGkVcZIW.jpg',
-                'https://image.tmdb.org/t/p/w342/zU0htIQ5Glsd6l75355KntvH2f6.jpg',
-                'https://image.tmdb.org/t/p/w342/apbrbWs8M9lyOpJYU5WXrpFbk1Z.jpg',
-                'https://image.tmdb.org/t/p/w342/rTmal9fOb0hEWabwgJSiFJGwqHC.jpg',
-                'https://image.tmdb.org/t/p/w342/7vjaCdMw15FEbXyLQTVa04URsPm.jpg',
-                'https://image.tmdb.org/t/p/w342/uOOtwVbSr4QDjAGIifLDwpb2Pdl.jpg',
-                'https://image.tmdb.org/t/p/w342/reEMJA1uzscCbkpeRJeTT2bjqUp.jpg',
-                'https://image.tmdb.org/t/p/w342/apbrbWs8M9lyOpJYU5WXrpFbk1Z.jpg',
-                'https://image.tmdb.org/t/p/w342/1QdXdRYfktUSONkl1oD5gc6Be0s.jpg',
-                'https://image.tmdb.org/t/p/w342/zjg4jpK1Wp2kiRvtt5ND0kznako.jpg',
-                'https://image.tmdb.org/t/p/w342/vUUqzWa2LnHIVqkaKVlVGkVcZIW.jpg',
-                'https://image.tmdb.org/t/p/w342/zU0htIQ5Glsd6l75355KntvH2f6.jpg',
-                'https://image.tmdb.org/t/p/w342/rTmal9fOb0hEWabwgJSiFJGwqHC.jpg',
-                'https://image.tmdb.org/t/p/w342/ggFHVNu6YYI5L9pCfOacjizRGt.jpg',
+                "https://image.tmdb.org/t/p/w342/uOOtwVbSr4QDjAGIifLDwpb2Pdl.jpg",
+                "https://image.tmdb.org/t/p/w342/1QdXdRYfktUSONkl1oD5gc6Be0s.jpg",
+                "https://image.tmdb.org/t/p/w342/7vjaCdMw15FEbXyLQTVa04URsPm.jpg",
+                "https://image.tmdb.org/t/p/w342/reEMJA1uzscCbkpeRJeTT2bjqUp.jpg",
+                "https://image.tmdb.org/t/p/w342/ggFHVNu6YYI5L9pCfOacjizRGt.jpg",
+                "https://image.tmdb.org/t/p/w342/zjg4jpK1Wp2kiRvtt5ND0kznako.jpg",
+                "https://image.tmdb.org/t/p/w342/vUUqzWa2LnHIVqkaKVlVGkVcZIW.jpg",
+                "https://image.tmdb.org/t/p/w342/zU0htIQ5Glsd6l75355KntvH2f6.jpg",
+                "https://image.tmdb.org/t/p/w342/apbrbWs8M9lyOpJYU5WXrpFbk1Z.jpg",
+                "https://image.tmdb.org/t/p/w342/rTmal9fOb0hEWabwgJSiFJGwqHC.jpg",
+                "https://image.tmdb.org/t/p/w342/7vjaCdMw15FEbXyLQTVa04URsPm.jpg",
+                "https://image.tmdb.org/t/p/w342/uOOtwVbSr4QDjAGIifLDwpb2Pdl.jpg",
+                "https://image.tmdb.org/t/p/w342/reEMJA1uzscCbkpeRJeTT2bjqUp.jpg",
+                "https://image.tmdb.org/t/p/w342/apbrbWs8M9lyOpJYU5WXrpFbk1Z.jpg",
+                "https://image.tmdb.org/t/p/w342/1QdXdRYfktUSONkl1oD5gc6Be0s.jpg",
+                "https://image.tmdb.org/t/p/w342/zjg4jpK1Wp2kiRvtt5ND0kznako.jpg",
+                "https://image.tmdb.org/t/p/w342/vUUqzWa2LnHIVqkaKVlVGkVcZIW.jpg",
+                "https://image.tmdb.org/t/p/w342/zU0htIQ5Glsd6l75355KntvH2f6.jpg",
+                "https://image.tmdb.org/t/p/w342/rTmal9fOb0hEWabwgJSiFJGwqHC.jpg",
+                "https://image.tmdb.org/t/p/w342/ggFHVNu6YYI5L9pCfOacjizRGt.jpg",
               ].map((src, i) => (
                 <div key={i} className="heroPosterCell">
                   <img src={src} alt="" loading="lazy" />
@@ -122,9 +126,9 @@ export function LandingPage({ authed, onGetStarted }: Props) {
             <div className="heroShade" />
           </div>
           <div className="heroInner">
-            <h1 className="heroTitle">{t('hero_title')}</h1>
-            <p className="heroSub">{t('hero_sub')}</p>
-            <p className="heroHint">{t('hero_hint')}</p>
+            <h1 className="heroTitle">{t("hero_title")}</h1>
+            <p className="heroSub">{t("hero_sub")}</p>
+            <p className="heroHint">{t("hero_hint")}</p>
             <div className="heroCta">
               <label className="nfField">
                 <input
@@ -134,10 +138,13 @@ export function LandingPage({ authed, onGetStarted }: Props) {
                   autoComplete="email"
                   placeholder=" "
                 />
-                <span className="nfFieldLabel">{t('email')}</span>
+                <span className="nfFieldLabel">{t("email")}</span>
               </label>
-              <button className="nfButton nfButtonBig nfButtonRed" onClick={onGetStarted}>
-                {t('get_started')}
+              <button
+                className="nfButton nfButtonBig nfButtonRed"
+                onClick={onGetStarted}
+              >
+                {t("get_started")}
                 <span aria-hidden="true" className="nfChevron">
                   <svg viewBox="0 0 24 24">
                     <path
@@ -155,73 +162,77 @@ export function LandingPage({ authed, onGetStarted }: Props) {
         <section className="landingSection">
           <div className="landingSectionInner">
             <TrendingRow
-              title={t('trending_now')}
+              title={t("trending_now")}
               items={movies.slice(0, 10)}
               onSelect={() => onGetStarted()}
             />
           </div>
         </section>
 
-        <section className="reasons">
-          <div className="reasonsInner">
-            <h2 className="reasonsTitle">{t('more_reasons')}</h2>
-            <div className="reasonsGrid">
-              <div className="reasonCard">
-                <div className="reasonCopy">
-                  <h3>{t('feature_tv_title')}</h3>
-                  <p>{t('feature_tv_body')}</p>
-                </div>
-                <div className="reasonMedia">
-                  <SmartImage src={tv} alt="" loading="lazy" />
-                </div>
-              </div>
-              <div className="reasonCard">
-                <div className="reasonCopy">
-                  <h3>{t('feature_dl_title')}</h3>
-                  <p>{t('feature_dl_body')}</p>
-                </div>
-                <div className="reasonMedia">
-                  <SmartImage src={mobile} alt="" loading="lazy" />
-                </div>
-              </div>
-              <div className="reasonCard">
-                <div className="reasonCopy">
-                  <h3>{t('feature_everywhere_title')}</h3>
-                  <p>{t('feature_everywhere_body')}</p>
-                </div>
-                <div className="reasonMedia">
-                  <SmartImage src={devices} alt="" loading="lazy" />
-                </div>
-              </div>
-              <div className="reasonCard">
-                <div className="reasonCopy">
-                  <h3>{t('feature_kids_title')}</h3>
-                  <p>{t('feature_kids_body')}</p>
-                </div>
-                <div className="reasonMedia">
-                  <SmartImage src={kids} alt="" loading="lazy" />
-                </div>
-              </div>
+        <section className="feature">
+          <div className="featureInner">
+            <div className="featureCopy">
+              <h2>{t("feature_tv_title")}</h2>
+              <p>{t("feature_tv_body")}</p>
+            </div>
+            <div className="featureMedia">
+              <SmartImage src={tv} alt="" loading="lazy" />
+            </div>
+          </div>
+        </section>
+
+        <section className="feature">
+          <div className="featureInner featureFlip">
+            <div className="featureMedia">
+              <SmartImage src={mobile} alt="" loading="lazy" />
+            </div>
+            <div className="featureCopy">
+              <h2>{t("feature_dl_title")}</h2>
+              <p>{t("feature_dl_body")}</p>
+            </div>
+          </div>
+        </section>
+
+        <section className="feature">
+          <div className="featureInner">
+            <div className="featureCopy">
+              <h2>{t("feature_everywhere_title")}</h2>
+              <p>{t("feature_everywhere_body")}</p>
+            </div>
+            <div className="featureMedia">
+              <SmartImage src={devices} alt="" loading="lazy" />
+            </div>
+          </div>
+        </section>
+
+        <section className="feature">
+          <div className="featureInner featureFlip">
+            <div className="featureMedia">
+              <SmartImage src={kids} alt="" loading="lazy" />
+            </div>
+            <div className="featureCopy">
+              <h2>{t("feature_kids_title")}</h2>
+              <p>{t("feature_kids_body")}</p>
             </div>
           </div>
         </section>
 
         <section className="faq">
           <div className="faqInner">
-            <h2 className="faqTitle">{t('faq_title')}</h2>
+            <h2 className="faqTitle">{t("faq_title")}</h2>
             <FaqAccordion
               items={[
-                { question: t('faq_q1'), answer: t('faq_a1') },
-                { question: t('faq_q2'), answer: t('faq_a2') },
-                { question: t('faq_q3'), answer: t('faq_a3') },
-                { question: t('faq_q4'), answer: t('faq_a4') },
-                { question: t('faq_q5'), answer: t('faq_a5') },
-                { question: t('faq_q6'), answer: t('faq_a6') },
+                { question: t("faq_q1"), answer: t("faq_a1") },
+                { question: t("faq_q2"), answer: t("faq_a2") },
+                { question: t("faq_q3"), answer: t("faq_a3") },
+                { question: t("faq_q4"), answer: t("faq_a4") },
+                { question: t("faq_q5"), answer: t("faq_a5") },
+                { question: t("faq_q6"), answer: t("faq_a6") },
               ]}
             />
 
             <div className="faqCta">
-              <p className="faqHint">{t('hero_hint')}</p>
+              <p className="faqHint">{t("hero_hint")}</p>
               <div className="heroCta heroCtaBottom">
                 <label className="nfField">
                   <input
@@ -231,10 +242,13 @@ export function LandingPage({ authed, onGetStarted }: Props) {
                     autoComplete="email"
                     placeholder=" "
                   />
-                  <span className="nfFieldLabel">{t('email')}</span>
+                  <span className="nfFieldLabel">{t("email")}</span>
                 </label>
-                <button className="nfButton nfButtonBig nfButtonRed" onClick={onGetStarted}>
-                  {t('get_started')}
+                <button
+                  className="nfButton nfButtonBig nfButtonRed"
+                  onClick={onGetStarted}
+                >
+                  {t("get_started")}
                   <span aria-hidden="true" className="nfChevron">
                     <svg viewBox="0 0 24 24">
                       <path
@@ -251,7 +265,7 @@ export function LandingPage({ authed, onGetStarted }: Props) {
 
         <footer className="landingFooter">
           <div className="landingFooterInner">
-            <div className="footerQuestions">{t('footer_questions')}</div>
+            <div className="footerQuestions">{t("footer_questions")}</div>
             <div className="footerGrid">
               <a href="#" onClick={(e) => e.preventDefault()}>
                 FAQ
@@ -272,10 +286,12 @@ export function LandingPage({ authed, onGetStarted }: Props) {
                 Corporate Information
               </a>
             </div>
-            <div className="footerNote">Netflix clone demo (no affiliation).</div>
+            <div className="footerNote">
+              Netflix clone demo (no affiliation).
+            </div>
           </div>
         </footer>
       </main>
     </div>
-  )
+  );
 }

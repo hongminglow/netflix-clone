@@ -22,6 +22,8 @@ function formatTime(seconds: number) {
   return `${m}:${ss}`;
 }
 
+const FALLBACK_TIMELINE_SECONDS = 90 * 60;
+
 export function VideoPlayer({ src, poster, title, onExit }: Props) {
   const { t } = useI18n();
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -33,20 +35,43 @@ export function VideoPlayer({ src, poster, title, onExit }: Props) {
   const [volume, setVolume] = useState(1);
   const [time, setTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [virtualProgress, setVirtualProgress] = useState(0);
   const [seeking, setSeeking] = useState(false);
+  const [scrubValue, setScrubValue] = useState<number | null>(null);
   const [hovering, setHovering] = useState(false);
   const [previewPct, setPreviewPct] = useState<number | null>(null);
   const [captionsOn, setCaptionsOn] = useState(false);
 
-  const progress = useMemo(() => {
-    if (!duration) return 0;
-    return clamp(time / duration, 0, 1);
-  }, [duration, time]);
+  const liveDuration = videoRef.current?.duration;
+  const hasRealDuration =
+    (Number.isFinite(liveDuration) && (liveDuration ?? 0) > 0) || duration > 0;
+  const activeDuration = (() => {
+    if (Number.isFinite(liveDuration) && (liveDuration ?? 0) > 0) {
+      return liveDuration as number;
+    }
+    if (duration > 0) return duration;
+    return FALLBACK_TIMELINE_SECONDS;
+  })();
 
-  const progressFill = Math.round(progress * 100);
+  const progress = useMemo(() => {
+    if (!activeDuration) return 0;
+    if (!hasRealDuration) return virtualProgress;
+    return clamp(time / activeDuration, 0, 1);
+  }, [activeDuration, hasRealDuration, time, virtualProgress]);
+
+  const displayedProgress =
+    seeking && scrubValue !== null ? scrubValue : progress;
+  const displayedTime =
+    seeking && scrubValue !== null
+      ? scrubValue * activeDuration
+      : hasRealDuration
+        ? time
+        : virtualProgress * activeDuration;
+
+  const progressFill = Math.round(displayedProgress * 100);
   const volumeFill = Math.round((muted ? 0 : volume) * 100);
   const previewTime =
-    previewPct === null ? null : formatTime((duration || 0) * previewPct);
+    previewPct === null ? null : formatTime(activeDuration * previewPct);
   const progressTrack = useMemo(
     () =>
       `linear-gradient(90deg, #e50914 0%, #e50914 ${progressFill}%, rgba(255,255,255,0.28) ${progressFill}%, rgba(255,255,255,0.28) 100%)`,
@@ -90,13 +115,45 @@ export function VideoPlayer({ src, poster, title, onExit }: Props) {
     v.currentTime = clamp(pct, 0, 1) * v.duration;
   };
 
+  const commitSeek = (pct: number) => {
+    const nextPct = clamp(pct, 0, 1);
+    const total = activeDuration;
+    setScrubValue(nextPct);
+    setVirtualProgress(nextPct);
+    setTime(nextPct * total);
+    if (hasRealDuration) {
+      seekTo(nextPct);
+    }
+  };
+
+  const startSeek = () => {
+    setSeeking(true);
+    setHovering(true);
+    setScrubValue(progress);
+  };
+
+  const finishSeek = () => {
+    const v = videoRef.current;
+    if (hasRealDuration && v && Number.isFinite(v.currentTime)) {
+      setTime(v.currentTime);
+    } else if (scrubValue !== null) {
+      setVirtualProgress(scrubValue);
+      setTime(scrubValue * activeDuration);
+    }
+    setSeeking(false);
+    setScrubValue(null);
+  };
+
   const skipBy = (seconds: number) => {
     const v = videoRef.current;
-    if (!v) return;
-    const total =
-      Number.isFinite(v.duration) && v.duration > 0 ? v.duration : duration;
-    const nextTime = clamp(v.currentTime + seconds, 0, total || 0);
-    v.currentTime = nextTime;
+    const total = activeDuration;
+    const baseTime = hasRealDuration && v ? v.currentTime : virtualProgress * total;
+    const nextTime = clamp(baseTime + seconds, 0, total || 0);
+    if (hasRealDuration && v) {
+      v.currentTime = nextTime;
+    } else if (total > 0) {
+      setVirtualProgress(nextTime / total);
+    }
     setTime(nextTime);
   };
 
@@ -115,6 +172,9 @@ export function VideoPlayer({ src, poster, title, onExit }: Props) {
       setReady(true);
       setDuration(Number.isFinite(v.duration) ? v.duration : 0);
     };
+    const onDuration = () => {
+      setDuration(Number.isFinite(v.duration) ? v.duration : 0);
+    };
     const onPlay = () => setPlaying(true);
     const onPause = () => setPlaying(false);
     const onTime = () => {
@@ -127,6 +187,7 @@ export function VideoPlayer({ src, poster, title, onExit }: Props) {
     };
 
     v.addEventListener("loadedmetadata", onLoaded);
+    v.addEventListener("durationchange", onDuration);
     v.addEventListener("play", onPlay);
     v.addEventListener("pause", onPause);
     v.addEventListener("timeupdate", onTime);
@@ -134,6 +195,7 @@ export function VideoPlayer({ src, poster, title, onExit }: Props) {
 
     return () => {
       v.removeEventListener("loadedmetadata", onLoaded);
+      v.removeEventListener("durationchange", onDuration);
       v.removeEventListener("play", onPlay);
       v.removeEventListener("pause", onPause);
       v.removeEventListener("timeupdate", onTime);
@@ -149,7 +211,7 @@ export function VideoPlayer({ src, poster, title, onExit }: Props) {
     const show = () => {
       setHovering(true);
       if (t) window.clearTimeout(t);
-      t = window.setTimeout(() => setHovering(false), 2200);
+      t = window.setTimeout(() => setHovering(false), 3500);
     };
 
     const onMove = () => show();
@@ -190,6 +252,22 @@ export function VideoPlayer({ src, poster, title, onExit }: Props) {
     };
   }, [onExit]);
 
+  useEffect(() => {
+    if (!seeking) return;
+
+    const onPointerUp = () => finishSeek();
+
+    window.addEventListener("mouseup", onPointerUp);
+    window.addEventListener("touchend", onPointerUp);
+    window.addEventListener("touchcancel", onPointerUp);
+
+    return () => {
+      window.removeEventListener("mouseup", onPointerUp);
+      window.removeEventListener("touchend", onPointerUp);
+      window.removeEventListener("touchcancel", onPointerUp);
+    };
+  }, [seeking]);
+
   return (
     <div className="player" ref={rootRef}>
       <video
@@ -202,8 +280,8 @@ export function VideoPlayer({ src, poster, title, onExit }: Props) {
         onClick={togglePlay}
       />
 
-      <div className={`playerHud ${hovering ? "isVisible" : ""}`}>
-        <div className="playerTop" onMouseMove={(e) => e.stopPropagation()}>
+      <div className={`playerHud ${hovering || seeking ? "isVisible" : ""}`}>
+        <div className="playerTop">
           {onExit && (
             <button className="playerBack" onClick={onExit} aria-label="Back">
               <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -218,7 +296,7 @@ export function VideoPlayer({ src, poster, title, onExit }: Props) {
           <div className="playerTitle">{title}</div>
         </div>
 
-        <div className="playerBottom" onMouseMove={(e) => e.stopPropagation()}>
+        <div className="playerBottom">
           <div className="playerProgress">
             <div
               className="playerSeekRail"
@@ -238,12 +316,12 @@ export function VideoPlayer({ src, poster, title, onExit }: Props) {
                 type="range"
                 min={0}
                 max={1000}
-                value={Math.round(progress * 1000)}
+                value={Math.round(displayedProgress * 1000)}
                 style={{ background: progressTrack }}
-                onMouseDown={() => setSeeking(true)}
-                onMouseUp={() => setSeeking(false)}
-                onTouchStart={() => setSeeking(true)}
-                onTouchEnd={() => setSeeking(false)}
+                onMouseDown={startSeek}
+                onMouseUp={finishSeek}
+                onTouchStart={startSeek}
+                onTouchEnd={finishSeek}
                 onMouseMove={(e) => {
                   const rect = e.currentTarget.getBoundingClientRect();
                   if (!rect.width) return;
@@ -251,17 +329,21 @@ export function VideoPlayer({ src, poster, title, onExit }: Props) {
                     clamp((e.clientX - rect.left) / rect.width, 0, 1),
                   );
                 }}
-                onFocus={() => setPreviewPct(progress)}
+                onFocus={() => setPreviewPct(displayedProgress)}
                 onBlur={() => setPreviewPct(null)}
                 onChange={(e) => {
                   const pct = Number(e.target.value) / 1000;
-                  setTime(pct * (duration || 0));
-                  seekTo(pct);
+                  commitSeek(pct);
+                }}
+                onInput={(e) => {
+                  const pct = Number(e.currentTarget.value) / 1000;
+                  commitSeek(pct);
+                  setPreviewPct(pct);
                 }}
               />
             </div>
             <div className="playerTime">
-              {formatTime(time)} / {formatTime(duration)}
+              {formatTime(displayedTime)} / {formatTime(activeDuration)}
             </div>
           </div>
 

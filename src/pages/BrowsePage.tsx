@@ -10,6 +10,8 @@ import { useI18n } from "@/i18n";
 import { buildWatchUrl, navigate, routes } from "@/lib/router";
 import { SmartImage } from "@/components/SmartImage";
 
+type RatingValue = "dislike" | "like" | "love";
+
 type Props = {
   profile: { id: string; name: string };
   onSignOut: () => void;
@@ -30,17 +32,28 @@ export function BrowsePage({ profile, onSignOut, view = "home" }: Props) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [selected, setSelected] = useState<Movie | null>(null);
   const myList = useMyList(profile.id);
-  const [likedIds, setLikedIds] = useLocalStorageState<string[]>(
-    `nf.likes.${profile.id}`,
-    [],
-  );
+  const [ratings, setRatings] = useLocalStorageState<
+    Record<string, RatingValue>
+  >(`nf.ratings.${profile.id}`, {});
+  const [ratingMenuId, setRatingMenuId] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const ratingWrapRef = useRef<HTMLDivElement>(null);
+  const ratingPopoverRef = useRef<HTMLDivElement>(null);
+  const ratingCloseTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     const onScroll = () => setSolidNav(window.scrollY > 12);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (ratingCloseTimerRef.current) {
+        window.clearTimeout(ratingCloseTimerRef.current);
+      }
+    };
   }, []);
 
   const handleSearchClick = () => {
@@ -100,14 +113,44 @@ export function BrowsePage({ profile, onSignOut, view = "home" }: Props) {
     return base;
   }, [filteredRows, myList.ids, t, view]);
 
-  const likedSet = useMemo(() => new Set(likedIds), [likedIds]);
+  const setRating = (movieId: string, value: RatingValue) => {
+    setRatings((prev) => {
+      if (prev[movieId] === value) {
+        const next = { ...prev };
+        delete next[movieId];
+        return next;
+      }
+      return { ...prev, [movieId]: value };
+    });
+    setRatingMenuId(null);
+  };
 
-  const toggleLike = (movieId: string) => {
-    setLikedIds((current) =>
-      current.includes(movieId)
-        ? current.filter((id) => id !== movieId)
-        : [...current, movieId],
-    );
+  const openRatingMenu = (movieId: string) => {
+    if (ratingCloseTimerRef.current) {
+      window.clearTimeout(ratingCloseTimerRef.current);
+      ratingCloseTimerRef.current = null;
+    }
+    setRatingMenuId(movieId);
+  };
+
+  const scheduleRatingMenuClose = (event?: React.MouseEvent<HTMLElement>) => {
+    const nextTarget = event?.relatedTarget as Node | null;
+    if (
+      nextTarget &&
+      (ratingWrapRef.current?.contains(nextTarget) ||
+        ratingPopoverRef.current?.contains(nextTarget))
+    ) {
+      return;
+    }
+
+    if (ratingCloseTimerRef.current) {
+      window.clearTimeout(ratingCloseTimerRef.current);
+    }
+
+    ratingCloseTimerRef.current = window.setTimeout(() => {
+      setRatingMenuId(null);
+      ratingCloseTimerRef.current = null;
+    }, 120);
   };
 
   return (
@@ -362,31 +405,221 @@ export function BrowsePage({ profile, onSignOut, view = "home" }: Props) {
                       </svg>
                     )}
                   </button>
-                  <button
-                    className={`nfButton nfButtonCircle ${likedSet.has(selected.id) ? "isLiked" : ""}`}
-                    onClick={() => toggleLike(selected.id)}
-                    aria-label={
-                      likedSet.has(selected.id) ? "Unlike title" : "Like title"
-                    }
+                  <div
+                    className="ratingWrap"
+                    ref={ratingWrapRef}
+                    onMouseLeave={scheduleRatingMenuClose}
                   >
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                      <path
-                        d="M14 9V5a3 3 0 0 0-3-3l-1 7H6a2 2 0 0 0-2 2v1a2 2 0 0 0 .2.9l2 4A2 2 0 0 0 8 18h7a2 2 0 0 0 1.9-1.4l2-6.7A2 2 0 0 0 17 7h-3"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M6 9v9"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                  </button>
+                    <button
+                      className={`nfButton nfButtonCircle ${
+                        ratings[selected.id] === "like" ||
+                        ratings[selected.id] === "love"
+                          ? "isLiked"
+                          : ratings[selected.id] === "dislike"
+                            ? "isDisliked"
+                            : ""
+                      }`}
+                              onMouseEnter={() => openRatingMenu(selected.id)}
+                              onFocus={() => openRatingMenu(selected.id)}
+                              onClick={() => openRatingMenu(selected.id)}
+                      aria-label="Rate this title"
+                    >
+                      {ratings[selected.id] === "dislike" ? (
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                          <path
+                            d="M10 15V19a3 3 0 0 0 3 3l1-7h4a2 2 0 0 0 2-2v-1a2 2 0 0 0-.2-.9l-2-4A2 2 0 0 0 16 6H9a2 2 0 0 0-1.9 1.4l-2 6.7A2 2 0 0 0 7 17h3"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M18 15V6"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                      ) : ratings[selected.id] === "love" ? (
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                          <g
+                            opacity="0.58"
+                            transform="translate(3 1.5) scale(0.82)"
+                          >
+                            <path
+                              d="M14 9V5a3 3 0 0 0-3-3l-1 7H6a2 2 0 0 0-2 2v1a2 2 0 0 0 .2.9l2 4A2 2 0 0 0 8 18h7a2 2 0 0 0 1.9-1.4l2-6.7A2 2 0 0 0 17 7h-3"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.8"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                            <path
+                              d="M6 9v9"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.8"
+                              strokeLinecap="round"
+                            />
+                          </g>
+                          <g transform="translate(-1 2.5) scale(0.9)">
+                            <path
+                              d="M14 9V5a3 3 0 0 0-3-3l-1 7H6a2 2 0 0 0-2 2v1a2 2 0 0 0 .2.9l2 4A2 2 0 0 0 8 18h7a2 2 0 0 0 1.9-1.4l2-6.7A2 2 0 0 0 17 7h-3"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.8"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                            <path
+                              d="M6 9v9"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.8"
+                              strokeLinecap="round"
+                            />
+                          </g>
+                        </svg>
+                      ) : (
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                          <path
+                            d="M14 9V5a3 3 0 0 0-3-3l-1 7H6a2 2 0 0 0-2 2v1a2 2 0 0 0 .2.9l2 4A2 2 0 0 0 8 18h7a2 2 0 0 0 1.9-1.4l2-6.7A2 2 0 0 0 17 7h-3"
+                            fill={
+                              ratings[selected.id] === "like"
+                                ? "currentColor"
+                                : "none"
+                            }
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M6 9v9"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                      )}
+                    </button>
+
+                    {ratingMenuId === selected.id && (
+                      <div
+                        className="ratingPopover"
+                        ref={ratingPopoverRef}
+                        role="menu"
+                        onMouseEnter={() => openRatingMenu(selected.id)}
+                        onMouseLeave={scheduleRatingMenuClose}
+                      >
+                        {/* Dislike */}
+                        <button
+                          className={`ratingOption ${ratings[selected.id] === "dislike" ? "isActive" : ""}`}
+                          onClick={() => setRating(selected.id, "dislike")}
+                          aria-label="Not for me"
+                          role="menuitem"
+                        >
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                              d="M10 15V19a3 3 0 0 0 3 3l1-7h4a2 2 0 0 0 2-2v-1a2 2 0 0 0-.2-.9l-2-4A2 2 0 0 0 16 6H9a2 2 0 0 0-1.9 1.4l-2 6.7A2 2 0 0 0 7 17h3"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.8"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                            <path
+                              d="M18 15V6"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.8"
+                              strokeLinecap="round"
+                            />
+                          </svg>
+                          <span className="ratingOptionLabel">Not for me</span>
+                        </button>
+
+                        {/* Like */}
+                        <button
+                          className={`ratingOption ${ratings[selected.id] === "like" ? "isActive" : ""}`}
+                          onClick={() => setRating(selected.id, "like")}
+                          aria-label="I like this"
+                          role="menuitem"
+                        >
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                              d="M14 9V5a3 3 0 0 0-3-3l-1 7H6a2 2 0 0 0-2 2v1a2 2 0 0 0 .2.9l2 4A2 2 0 0 0 8 18h7a2 2 0 0 0 1.9-1.4l2-6.7A2 2 0 0 0 17 7h-3"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.8"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                            <path
+                              d="M6 9v9"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.8"
+                              strokeLinecap="round"
+                            />
+                          </svg>
+                          <span className="ratingOptionLabel">I like this</span>
+                        </button>
+
+                        {/* Love */}
+                        <button
+                          className={`ratingOption ${ratings[selected.id] === "love" ? "isActive" : ""}`}
+                          onClick={() => setRating(selected.id, "love")}
+                          aria-label="Love this!"
+                          role="menuitem"
+                        >
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <g
+                              opacity="0.58"
+                              transform="translate(3 1.5) scale(0.82)"
+                            >
+                              <path
+                                d="M14 9V5a3 3 0 0 0-3-3l-1 7H6a2 2 0 0 0-2 2v1a2 2 0 0 0 .2.9l2 4A2 2 0 0 0 8 18h7a2 2 0 0 0 1.9-1.4l2-6.7A2 2 0 0 0 17 7h-3"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="1.8"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                              <path
+                                d="M6 9v9"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="1.8"
+                                strokeLinecap="round"
+                              />
+                            </g>
+                            <g transform="translate(-1 2.5) scale(0.9)">
+                              <path
+                                d="M14 9V5a3 3 0 0 0-3-3l-1 7H6a2 2 0 0 0-2 2v1a2 2 0 0 0 .2.9l2 4A2 2 0 0 0 8 18h7a2 2 0 0 0 1.9-1.4l2-6.7A2 2 0 0 0 17 7h-3"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="1.8"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                              <path
+                                d="M6 9v9"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="1.8"
+                                strokeLinecap="round"
+                              />
+                            </g>
+                          </svg>
+                          <span className="ratingOptionLabel">Love this!</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
